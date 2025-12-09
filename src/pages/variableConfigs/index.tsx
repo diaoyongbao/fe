@@ -46,9 +46,25 @@ export default function index() {
 
   return (
     <PageLayout
-      title={<Space>{t('title')}</Space>}
+      title={
+        <Space>
+          {t('title')}
+          <a
+            style={{ fontSize: 12 }}
+            onClick={() => {
+              DocumentDrawer({
+                language: i18n.language,
+                title: t('common:document_link'),
+                type: 'iframe',
+                documentPath: 'https://flashcat.cloud/docs/content/flashcat-monitor/nightingale-v7/usage/system-configuration/variable/',
+              });
+            }}
+          >
+            {t('common:document_link')}
+          </a>
+        </Space>
+      }
       icon={<SettingOutlined />}
-      doc='https://flashcat.cloud/docs/content/flashcat-monitor/nightingale-v7/usage/system-configuration/variable/'
     >
       <div>
         <div

@@ -6,6 +6,9 @@ import IconFont from '@/components/IconFont';
 import { MenuItem } from './types';
 import './locale';
 
+// Extensions - AIOps menu
+import { aiopsMenu } from '@/extensions/aiops/menu';
+
 export const getMenuList = (embeddedProductMenu: MenuItem[] = [], hideDeprecatedMenus: boolean = false) => {
   const menu: MenuItem[] = [
     {
@@ -108,19 +111,21 @@ export const getMenuList = (embeddedProductMenu: MenuItem[] = [], hideDeprecated
         ...(hideDeprecatedMenus
           ? []
           : [
-              {
-                key: '/help/notification-settings',
-                label: 'menu.notification_settings',
-                deprecated: true,
-              },
-              {
-                key: '/help/notification-tpls',
-                label: 'menu.notification_tpls',
-                deprecated: true,
-              },
-            ]),
+            {
+              key: '/help/notification-settings',
+              label: 'menu.notification_settings',
+              deprecated: true,
+            },
+            {
+              key: '/help/notification-tpls',
+              label: 'menu.notification_tpls',
+              deprecated: true,
+            },
+          ]),
       ],
     },
+    // Extensions - AIOps menu
+    aiopsMenu,
     {
       key: 'integrations',
       label: 'menu.integrations',

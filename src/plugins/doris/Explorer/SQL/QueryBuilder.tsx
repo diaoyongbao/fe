@@ -1,15 +1,13 @@
-import React, { useContext } from 'react';
+import React from 'react';
 import _ from 'lodash';
-import { useTranslation, Trans } from 'react-i18next';
-import { Form, Space, Tooltip } from 'antd';
+import { useTranslation } from 'react-i18next';
+import { Form, Space } from 'antd';
 
-import { CommonStateContext } from '@/App';
 import InputGroupWithFormItem from '@/components/InputGroupWithFormItem';
 import TimeRangePicker from '@/components/TimeRangePicker';
 import LogQL from '@/components/LogQL';
 import { DatasourceCateEnum } from '@/utils/constant';
 import HistoricalRecords from '@/components/HistoricalRecords';
-import DocumentDrawer from '@/components/DocumentDrawer';
 
 import { SQL_CACHE_KEY, NAME_SPACE } from '../../constants';
 
@@ -21,8 +19,7 @@ interface Props {
 }
 
 export default function QueryBuilder(props: Props) {
-  const { t, i18n } = useTranslation(NAME_SPACE);
-  const { logsDefaultRange, darkMode } = useContext(CommonStateContext);
+  const { t } = useTranslation(NAME_SPACE);
   const form = Form.useFormInstance();
   const { extra, executeQuery, datasourceValue, labelInfo } = props;
 
@@ -52,7 +49,7 @@ export default function QueryBuilder(props: Props) {
               query={{}}
               historicalRecords={[]}
               onPressEnter={executeQuery}
-              placeholder='SELECT count(*) as count FROM db_name.table_name WHERE $__timeFilter(timestamp)'
+              placeholder={t('query.query_placeholder')}
             />
           </Form.Item>
         </InputGroupWithFormItem>
@@ -68,43 +65,9 @@ export default function QueryBuilder(props: Props) {
             executeQuery();
           }}
         />
-        <Tooltip
-          overlayClassName='ant-tooltip-with-link ant-tooltip-auto-width'
-          title={
-            <Trans
-              ns={NAME_SPACE}
-              i18nKey='query.time_field_tip'
-              components={{
-                span: (
-                  <span
-                    style={{
-                      color: 'var(--fc-orange-5-color)',
-                    }}
-                  />
-                ),
-                br: <br />,
-                a: (
-                  <a
-                    onClick={() => {
-                      DocumentDrawer({
-                        language: i18n.language === 'zh_CN' ? 'zh_CN' : 'en_US',
-                        darkMode,
-                        title: t('common:document_link'),
-                        type: 'iframe',
-                        documentPath: `/docs/content/flashcat/log/discover/what-is-sql-mode-in-doris-discover/`,
-                        anchor: '#时间宏',
-                      });
-                    }}
-                  />
-                ),
-              }}
-            />
-          }
-        >
-          <Form.Item name={['query', 'range']} initialValue={logsDefaultRange}>
-            <TimeRangePicker />
-          </Form.Item>
-        </Tooltip>
+        <Form.Item name={['query', 'range']} initialValue={{ start: 'now-1h', end: 'now' }}>
+          <TimeRangePicker />
+        </Form.Item>
         {extra}
       </div>
     </div>

@@ -133,8 +133,12 @@ const index = (_props: any) => {
   return (
     <PageLayout
       icon={<CodeOutlined />}
-      title={<Space>{t('task')}</Space>}
-      doc='https://flashcat.cloud/docs/content/flashcat-monitor/nightingale-v7/usage/self-healing/create-temporary-task/'
+      title={
+        <Space>
+          {t('task')}
+          <HelpLink src='https://flashcat.cloud/docs/content/flashcat-monitor/nightingale-v7/usage/self-healing/create-temporary-task/' />
+        </Space>
+      }
     >
       <div style={{ display: 'flex' }}>
         <BusinessGroupSideBarWithAll gids={gids} setGids={setGids} localeKey={N9E_GIDS_LOCALKEY} allOptionLabel={t('common:task.allOptionLabel')} />

@@ -43,12 +43,15 @@ export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), '');
   // 后端接口地址
   // 也可以通过环境变量来设置，创建 `.env` 文件，内容为 `PROXY=http://localhost:8080`
-  let proxyURL = env.PROXY || 'http://localhost:8080';
+  let proxyURL = env.PROXY || 'http://10.4.17.100:17000';
   if (env.VITE_IS_PRO) {
     proxyURL = env.PROXY_PRO;
   } else if (env.VITE_IS_ENT) {
     proxyURL = env.PROXY_ENT;
   }
+
+  // 自定义后端地址
+  const customProxyURL = env.PROXY_CUSTOM || 'http://localhost:9090';
 
   const baseName = env.VITE_PREFIX || '';
 
@@ -91,6 +94,17 @@ export default defineConfig(({ mode }) => {
     server: {
       hmr: false,
       proxy: {
+        // 自定义后端代理 - 必须放在 /api/n9e 之前
+        '/api/custom': {
+          target: customProxyURL,
+          changeOrigin: true,
+        },
+        // 夜莺核心后端代理
+        '/api/n9e': {
+          target: proxyURL,
+          changeOrigin: true,
+        },
+        // 其他 /api 请求默认转发到夜莺后端
         '/api': {
           target: proxyURL,
           changeOrigin: true,

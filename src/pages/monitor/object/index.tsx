@@ -51,9 +51,13 @@ export default function index() {
 
   return (
     <PageLayout
-      title={<Space>{t('title')}</Space>}
+      title={
+        <Space>
+          {t('title')}
+          <HelpLink src='https://flashcat.cloud/docs/content/flashcat-monitor/nightingale-v7/usage/time-series/quick-view/' />
+        </Space>
+      }
       icon={<LineChartOutlined />}
-      doc='https://flashcat.cloud/docs/content/flashcat-monitor/nightingale-v7/usage/time-series/quick-view/'
       rightArea={
         <div
           style={{

@@ -56,6 +56,11 @@ const zh_CN = {
     audit_log: '审计日志',
     alert_servers: '告警引擎',
     about: '关于产品',
+    // AIOps 菜单
+    aiops: 'AIOps',
+    aiops_mcp: 'MCP管理',
+    aiops_chat: 'AI Chat',
+    aiops_settings: 'AI设置',
   },
 };
 export default zh_CN;

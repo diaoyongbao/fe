@@ -1,4 +1,4 @@
-/** Request 网络请求工具 更详细的 api 文档: https://github.com/umijs/umi-request */
+/** Request 网络请求工具 更详细的 api 文档: https://github.com/umijs/umi-request */
 import React, { useState } from 'react';
 import Request, { ResponseError, extend } from 'umi-request';
 import { notification } from 'antd';
@@ -94,8 +94,9 @@ request.interceptors.response.use(
           // proxy/prometheus 返回的数据结构是 { status: 'success', data: {} }
           // proxy/elasticsearch 返回的数据结构是 { ...data }
           // proxy/jeager 返回的数据结构是 { data: [], errors: [] }
+          // /api/custom/ 返回的数据结构是直接的数据对象
           if (
-            _.some([`/api/${N9E_PATHNAME}/proxy`, '/probe/v1'], (item) => {
+            _.some([`/api/${N9E_PATHNAME}/proxy`, '/probe/v1', '/api/custom'], (item) => {
               return url.includes(item);
             })
           ) {
@@ -137,16 +138,16 @@ request.interceptors.response.use(
       } else {
         localStorage.getItem('refresh_token')
           ? UpdateAccessToken().then((res) => {
-              console.log('401 err', res);
-              if (res.err) {
-                location.href = combineLoginURL();
-              } else {
-                const { access_token, refresh_token } = res.dat;
-                localStorage.setItem(AccessTokenKey, access_token);
-                localStorage.setItem('refresh_token', refresh_token);
-                location.href = `${basePrefix}${location.pathname}${location.search}`;
-              }
-            })
+            console.log('401 err', res);
+            if (res.err) {
+              location.href = combineLoginURL();
+            } else {
+              const { access_token, refresh_token } = res.dat;
+              localStorage.setItem(AccessTokenKey, access_token);
+              localStorage.setItem('refresh_token', refresh_token);
+              location.href = `${basePrefix}${location.pathname}${location.search}`;
+            }
+          })
           : (location.href = combineLoginURL());
       }
     } else if (

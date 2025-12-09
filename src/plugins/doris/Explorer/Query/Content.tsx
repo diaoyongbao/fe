@@ -36,25 +36,21 @@ export default function index(props: Props) {
   const refreshFlag = Form.useWatch('refreshFlag');
   const datasourceValue = Form.useWatch(['datasourceValue']);
   const queryValues = Form.useWatch(['query']);
-  // 点击直方图某个柱子时，设置的时间范围
-  const snapRangeRef = useRef<{
-    from?: number;
-    to?: number;
-  }>({
-    from: undefined,
-    to: undefined,
-  });
-  // 用于显示展示的时间范围
-  const rangeRef = useRef<{
-    from: number;
-    to: number;
-  }>();
+  const rangeRef = useRef<any>();
   const [collapsed, setCollapsed] = useState(true);
+  const [queryRefreshFlag, setQueryRefreshFlag] = useState<string>();
   const [options, setOptions] = useState(getLocalstorageOptions(QUERY_LOGS_OPTIONS_CACHE_KEY));
   const [serviceParams, setServiceParams, getServiceParams] = useGetState({
     current: 1,
     pageSize: 10,
     reverse: true,
+  });
+  const [snapRange, setSnapRange] = useState<{
+    from?: number;
+    to?: number;
+  }>({
+    from: undefined,
+    to: undefined,
   });
   const updateOptions = (newOptions) => {
     const mergedOptions = {
@@ -90,14 +86,7 @@ export default function index(props: Props) {
     const queryValues = form.getFieldValue('query');
     if (datasourceValue && queryValues?.database && queryValues?.table && queryValues?.time_field) {
       const range = parseRange(queryValues.range);
-      let timeParams = {
-        from: moment(range.start).unix(),
-        to: moment(range.end).unix(),
-      };
-      if (snapRangeRef.current && snapRangeRef.current.from && snapRangeRef.current.to) {
-        timeParams = snapRangeRef.current as { from: number; to: number };
-      }
-      rangeRef.current = timeParams;
+      rangeRef.current = range;
       return getDorisLogsQuery({
         cate: DatasourceCateEnum.doris,
         datasource_id: datasourceValue,
@@ -107,8 +96,8 @@ export default function index(props: Props) {
             table: queryValues.table,
             time_field: queryValues.time_field,
             query: queryValues.query,
-            from: timeParams.from,
-            to: timeParams.to,
+            from: moment(range.start).unix(),
+            to: moment(range.end).unix(),
             lines: serviceParams.pageSize,
             offset: (serviceParams.current - 1) * serviceParams.pageSize,
             reverse: serviceParams.reverse,
@@ -147,7 +136,7 @@ export default function index(props: Props) {
     | undefined,
     any
   >(service, {
-    refreshDeps: [refreshFlag, JSON.stringify(serviceParams)],
+    refreshDeps: [queryRefreshFlag, JSON.stringify(serviceParams)],
   });
 
   const histogramService = () => {
@@ -199,6 +188,8 @@ export default function index(props: Props) {
           ...prev,
           current: 1,
         }));
+      } else {
+        setQueryRefreshFlag(_.uniqueId('queryRefreshFlag_'));
       }
     }
   }, [refreshFlag]);
@@ -211,13 +202,6 @@ export default function index(props: Props) {
     },
     refreshFlag,
   );
-
-  useEffect(() => {
-    snapRangeRef.current = {
-      from: undefined,
-      to: undefined,
-    };
-  }, [JSON.stringify(queryValues?.range)]);
 
   return !_.isEmpty(data?.list) ? (
     <div className='flex h-full min-h-0 gap-[16px]'>
@@ -244,9 +228,13 @@ export default function index(props: Props) {
           histogramExtraRender={
             data && (
               <Space>
-                {rangeRef.current && (
+                {snapRange.from && snapRange.to ? (
                   <>
-                    {moment.unix(rangeRef.current?.from).format('YYYY-MM-DD HH:mm:ss.SSS')} ~ {moment.unix(rangeRef.current?.to).format('YYYY-MM-DD HH:mm:ss.SSS')}
+                    {moment.unix(snapRange.from).format('YYYY-MM-DD HH:mm:ss.SSS')} ~ {moment.unix(snapRange.to).format('YYYY-MM-DD HH:mm:ss.SSS')}
+                  </>
+                ) : (
+                  <>
+                    {moment(rangeRef.current?.start).format('YYYY-MM-DD HH:mm:ss.SSS')} ~ {moment(rangeRef.current?.end).format('YYYY-MM-DD HH:mm:ss.SSS')}
                   </>
                 )}
                 {IS_PLUS && <DownloadModal queryData={{ ...form.getFieldsValue(), total: data?.total }} />}
@@ -277,34 +265,22 @@ export default function index(props: Props) {
           onAddToQuery={handleValueFilter}
           onRangeChange={(range) => {
             const query = form.getFieldValue('query') || {};
-            snapRangeRef.current = {
-              from: undefined,
-              to: undefined,
-            };
             form.setFieldsValue({
               query: {
                 ...query,
                 range,
               },
-              refreshFlag: _.uniqueId('refreshFlag_'),
             });
+            setQueryRefreshFlag(_.uniqueId('refreshFlag_'));
           }}
           onLogRequestParamsChange={(params) => {
             if (params.from && params.to) {
-              snapRangeRef.current = {
+              setSnapRange({
                 from: params.from,
                 to: params.to,
-              };
-              form.setFieldsValue({
-                refreshFlag: _.uniqueId('refreshFlag_'),
               });
             }
-            if (params.reverse !== undefined) {
-              setServiceParams((prev) => ({
-                ...prev,
-                reverse: params.reverse,
-              }));
-            }
+            setQueryRefreshFlag(_.uniqueId('queryRefreshFlag_'));
           }}
           // state context
           fieldConfig={currentFieldConfig}

@@ -39,9 +39,13 @@ export default function index() {
 
   return (
     <PageLayout
-      title={<Space>{t('title')}</Space>}
+      title={
+        <Space>
+          {t('title')}
+          <HelpLink src='https://flashcat.cloud/docs/content/flashcat-monitor/nightingale-v7/usage/personnel-permissions/permissions-management/' />
+        </Space>
+      }
       icon={<SafetyCertificateOutlined />}
-      doc='https://flashcat.cloud/docs/content/flashcat-monitor/nightingale-v7/usage/personnel-permissions/permissions-management/'
     >
       <div className='user-manage-content'>
         <div style={{ display: 'flex', gap: 10, height: '100%', background: 'unset' }}>

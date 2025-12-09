@@ -62,7 +62,7 @@ const SideMenu = (props: SideMenuProps) => {
   const [selectedKeys, setSelectedKeys] = useState<string[]>();
   const [collapsed, setCollapsed] = useState<boolean>(Number(localStorage.getItem('menuCollapsed')) === 1);
   const [collapsedHover, setCollapsedHover] = useState<boolean>(false);
-  const quickMenuRef = useRef<{ open: () => void }>({ open: () => {} });
+  const quickMenuRef = useRef<{ open: () => void }>({ open: () => { } });
   const isCustomBg = sideMenuBgMode !== 'light';
   const [embeddedProductMenu, setEmbeddedProductMenu] = useState<MenuItem[]>([]);
   const [menus, setMenus] = useState<MenuItem[]>([]);
@@ -153,7 +153,7 @@ const SideMenu = (props: SideMenuProps) => {
       .filter(Boolean) as MenuItem[];
 
     setMenus(filteredMenus);
-  }, [i18n.language, embeddedProductMenu]);
+  }, [i18n.language, embeddedProductMenu, perms]);
 
   const menuPaths = useMemo(
     () =>

@@ -20,7 +20,6 @@ interface Props {
   documentPath: string;
   type?: 'md' | 'iframe';
   zIndex?: number;
-  anchor?: string;
   onClose?: (destroy: () => void) => void;
 }
 
@@ -32,8 +31,8 @@ const filenameMap = {
 
 function index(props: Props & ModalWrapProps) {
   const { t } = useTranslation();
-  const { visible, destroy, title, width = '60%', documentPath, onClose, type = 'md', zIndex, anchor } = props;
-  const language = IS_ENT ? 'zh_CN' : props.language ?? 'zh_CN'; //
+  const { visible, destroy, title, width = '60%', documentPath, onClose, type = 'md', zIndex } = props;
+  const language = 'zh_CN'; // TODO: 因为文档那边还没有多语言支持，先默认写死为中文
   const darkMode = props.darkMode ?? window.document.body.classList.contains('theme-dark');
   const [document, setDocument] = useState('');
   const [loading, setLoading] = useState(true);
@@ -75,7 +74,7 @@ function index(props: Props & ModalWrapProps) {
         <Space>
           {title}
           {type === 'iframe' && (
-            <a target='_blank' href={`${realDocumentPath}${filenameMap[language]}/${anchor || ''}`} className='text-[12px]'>
+            <a target='_blank' href={`${realDocumentPath}${filenameMap[language]}/`} className='text-[12px]'>
               <Space size={4}>
                 {t('common:more_document_link')}
                 <ExportOutlined />
@@ -110,7 +109,7 @@ function index(props: Props & ModalWrapProps) {
       {type === 'iframe' && (
         <Spin spinning={loading} wrapperClassName='n9e-document-drawer-iframe-loading'>
           <iframe
-            src={`${realDocumentPath}${filenameMap[language]}/?onlyContent&theme=${darkMode ? 'dark' : 'light'}${anchor || ''}`}
+            src={`${realDocumentPath}${filenameMap[language]}/?onlyContent&theme=${darkMode ? 'dark' : 'light'}`}
             style={{ width: '100%', height: '100%', border: '0 none', visibility: loading ? 'hidden' : 'visible' }}
             onLoad={() => {
               setLoading(false);

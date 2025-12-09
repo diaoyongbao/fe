@@ -35,9 +35,13 @@ export default function index() {
 
   return (
     <PageLayout
-      title={<Space>{t('title')}</Space>}
+      title={
+        <Space>
+          {t('title')}
+          <HelpLink src='https://flashcat.cloud/docs/content/flashcat-monitor/nightingale-v7/usage/system-configuration/notification-template/' />
+        </Space>
+      }
       icon={<SoundOutlined />}
-      doc='https://flashcat.cloud/docs/content/flashcat-monitor/nightingale-v7/usage/system-configuration/notification-template/'
     >
       <div>
         <div className='n9e-notification-tpls user-manage-content'>

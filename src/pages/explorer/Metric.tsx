@@ -32,7 +32,7 @@ const MetricExplorerPage = () => {
   ]);
 
   return (
-    <PageLayout title={t('title')} icon={<LineChartOutlined />} doc='https://flashcat.cloud/docs/content/flashcat-monitor/nightingale-v8/quickstart/ad-hoc/'>
+    <PageLayout title={t('title')} icon={<LineChartOutlined />}>
       <div>
         <div style={{ boxShadow: 'unset', background: 'unset' }}>
           <div>

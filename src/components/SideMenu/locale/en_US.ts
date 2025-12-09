@@ -57,6 +57,11 @@ const en_US = {
     audit_log: 'Audit log',
     alert_servers: 'Alerting engines',
     about: 'About',
+    // AIOps menu
+    aiops: 'AIOps',
+    aiops_mcp: 'MCP Management',
+    aiops_chat: 'AI Chat',
+    aiops_settings: 'AI Settings',
   },
 };
 export default en_US;

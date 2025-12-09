@@ -240,33 +240,17 @@ export default function EditModal(props: IProps) {
               } else if (mode === 'edit') {
                 newData = _.map(newData, (item, i) => {
                   if (i === recordIndex) {
-                    return {
-                      ...item,
-                      ...val,
-                    };
+                    return val;
                   }
                   return item;
                 });
-                // 2023-01-25 如果修改了数据源变量的默认值，更新该变量的已选值
-                // 2025-12-08 修复在新版本变量组件中该功能失效的问题
+                // TODO 2023-01-25 如果修改了数据源变量的默认值，更新该变量的已选值
                 if (val.type === 'datasource' && val.defaultValue) {
-                  const prevFinded = _.find(prev, { name: val.name });
                   const finded = _.find(newData, { name: val.name });
-                  if (prevFinded && finded) {
-                    const preDefaultValue = prevFinded?.defaultValue;
+                  if (finded) {
+                    const preDefaultValue = finded?.defaultValue;
                     if (preDefaultValue !== val.defaultValue) {
                       finded.value = val.defaultValue;
-
-                      // replace url 参数
-                      const newQueryParams = location.search ? queryString.parse(location.search) : {};
-                      history.replace({
-                        pathname: location.pathname,
-                        search: queryString.stringify(
-                          _.assign(newQueryParams, {
-                            [val.name]: val.defaultValue,
-                          }),
-                        ),
-                      });
                     }
                   }
                 }

@@ -98,7 +98,7 @@ const AddShield: React.FC = () => {
   }, [search]);
 
   return (
-    <PageLayout title={t('title')} showBack doc='https://flashcat.cloud/docs/content/flashcat-monitor/nightingale-v7/usage/alert/alert-mute/'>
+    <PageLayout title={t('title')} showBack>
       <div className='shield-add'>{eventDetail && <OperateForm detail={eventDetail} />}</div>
     </PageLayout>
   );

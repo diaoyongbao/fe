@@ -30,7 +30,7 @@ export default function Add() {
   }, []);
 
   return (
-    <PageLayout title={t('title')} showBack backPath={`/${NS}`} doc='https://flashcat.cloud/docs/content/flashcat-monitor/nightingale-v8/usecase/media/'>
+    <PageLayout title={t('title')} showBack backPath={`/${NS}`}>
       <div className='n9e'>
         {data ? (
           <Form

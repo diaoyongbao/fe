@@ -247,9 +247,13 @@ const Resource: React.FC = () => {
 
   return (
     <PageLayout
-      title={<Space>{t('user.title')}</Space>}
+      title={
+        <Space>
+          {t('user.title')}
+          <HelpLink src='https://flashcat.cloud/docs/content/flashcat-monitor/nightingale-v7/usage/personnel-permissions/user-management/' />
+        </Space>
+      }
       icon={<UserOutlined />}
-      doc='https://flashcat.cloud/docs/content/flashcat-monitor/nightingale-v7/usage/personnel-permissions/user-management/'
     >
       <div className='user-manage-content'>
         <div className='user-content fc-border'>

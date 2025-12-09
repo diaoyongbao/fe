@@ -78,6 +78,9 @@ import plusLoader from 'plus:/utils/loader';
 // @ts-ignore
 import useIsPlus from 'plus:/components/useIsPlus';
 
+// Extensions - AIOps routes
+import { aiopsRoutes } from '@/extensions/aiops/routes';
+
 const Packages = dynamicPackages();
 let lazyRoutes = Packages.reduce((result: any, module: Entry) => {
   return (result = result.concat(module.routes));
@@ -120,7 +123,8 @@ export default function Content() {
       !_.includes(['/', '/account/profile/info', '/account/profile/pwd', '/account/profile/token', '/alert-aggr-events'], location.pathname) &&
       !location.pathname.includes('/settings/datasource/edit/') &&
       !location.pathname.includes('/settings/infrastructure/add') &&
-      !location.pathname.includes('/settings/source/')
+      !location.pathname.includes('/settings/source/') &&
+      !location.pathname.startsWith('/aiops/')
     ) {
       if (profile?.roles.indexOf('Admin') === -1) {
         // 如果没有权限则重定向到 403 页面
@@ -211,6 +215,9 @@ export default function Content() {
         <Route exact path='/roles' component={Permissions} />
 
         {import.meta.env.VITE_IS_ENT !== 'true' && <Route exact path='/system/site-settings' component={SiteSettings} />}
+
+        {/* Extensions - AIOps routes */}
+        {aiopsRoutes}
 
         {lazyRoutes.map((route, i) => (
           <RouteWithSubRoutes key={i} {...route} />

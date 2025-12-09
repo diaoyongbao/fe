@@ -47,7 +47,6 @@ interface Props {
   filterFields?: (fieldKeys: string[]) => string[];
   histogramExtraRender?: React.ReactNode;
   optionsExtraRender?: React.ReactNode;
-  showDateField?: boolean;
 
   /** 以下是 context 依赖的数据 */
   /** 字段下钻、格式化相关配置 */
@@ -93,9 +92,15 @@ export default function LogsViewer(props: Props) {
     filterFields,
     histogramExtraRender,
     optionsExtraRender,
-    showDateField = true,
   } = props;
   const [options, setOptions] = useState(props.options);
+  const [snapRange, setSnapRange] = useState<{
+    from?: number;
+    to?: number;
+  }>({
+    from: undefined,
+    to: undefined,
+  });
 
   const updateOptions = (newOptions) => {
     onOptionsChange?.(newOptions);
@@ -177,7 +182,7 @@ export default function LogsViewer(props: Props) {
                   });
                 }}
               />
-              <OriginSettings showDateField={showDateField} options={options} setOptions={updateOptions} fields={fields} />
+              <OriginSettings showDateField options={options} setOptions={updateOptions} fields={fields} />
               <FullscreenButton />
               <Spin spinning={loading} size='small' />
             </Space>
@@ -202,17 +207,7 @@ export default function LogsViewer(props: Props) {
                 />
               )}
               {options.logMode === 'table' && (
-                <Table
-                  timeField={timeField}
-                  data={logs}
-                  options={options}
-                  onValueFilter={onAddToQuery}
-                  scroll={{
-                    x: 'max-content',
-                    y: 'calc(100% - 40px)',
-                  }}
-                  filterFields={filterFields}
-                />
+                <Table timeField={timeField} data={logs} options={options} onValueFilter={onAddToQuery} scroll={{ x: 'max-content', y: 'calc(100% - 34px)' }} />
               )}
             </div>
           </div>

@@ -73,7 +73,6 @@ export enum BaseDatasourceCateEnum {
   mysql = 'mysql',
   pgsql = 'pgsql',
   doris = 'doris',
-  victorialogs = 'victorialogs',
 }
 
 export const DatasourceCateEnum = { ...BaseDatasourceCateEnum, ...AdvancedDatasourceCateEnum };
