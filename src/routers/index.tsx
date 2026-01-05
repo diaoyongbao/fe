@@ -70,6 +70,10 @@ import NotificationSettings from '@/pages/help/NotificationSettings';
 import MigrateDashboards from '@/pages/help/migrate';
 import VariableConfigs from '@/pages/variableConfigs';
 import SiteSettings from '@/pages/siteSettings';
+import DBMInstanceList from '@/pages/dbm';
+import SessionManagement from '@/pages/dbm/Sessions';
+import SlowQueryAnalysis from '@/pages/dbm/SlowQueries';
+import SQLQueryWorkbench from '@/pages/dbm/SQLQuery';
 import { dynamicPackages, Entry, dynamicPages } from '@/utils';
 // @ts-ignore
 import { Jobs as StrategyBrain } from 'plus:/datasource/anomaly';
@@ -209,6 +213,12 @@ export default function Content() {
         <Route exact path='/trace/dependencies' component={TraceDependencies} />
 
         <Route exact path='/roles' component={Permissions} />
+
+        {/* 数据库管理路由 */}
+        <Route exact path='/dbm' component={DBMInstanceList} />
+        <Route exact path='/dbm/sessions' component={SessionManagement} />
+        <Route exact path='/dbm/slow-queries' component={SlowQueryAnalysis} />
+        <Route exact path='/dbm/sql-query' component={SQLQueryWorkbench} />
 
         {import.meta.env.VITE_IS_ENT !== 'true' && <Route exact path='/system/site-settings' component={SiteSettings} />}
 

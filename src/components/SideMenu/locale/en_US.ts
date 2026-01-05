@@ -41,6 +41,7 @@ const en_US = {
     notification_tpls: 'Template',
     integrations: 'Integrations',
     data_source: 'Data sources',
+    dbm: 'Database Management',
     built_in_components: 'Components',
     label_mapping: 'Label mappings',
     embedded_products: 'Embedded products',

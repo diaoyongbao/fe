@@ -108,17 +108,17 @@ export const getMenuList = (embeddedProductMenu: MenuItem[] = [], hideDeprecated
         ...(hideDeprecatedMenus
           ? []
           : [
-              {
-                key: '/help/notification-settings',
-                label: 'menu.notification_settings',
-                deprecated: true,
-              },
-              {
-                key: '/help/notification-tpls',
-                label: 'menu.notification_tpls',
-                deprecated: true,
-              },
-            ]),
+            {
+              key: '/help/notification-settings',
+              label: 'menu.notification_settings',
+              deprecated: true,
+            },
+            {
+              key: '/help/notification-tpls',
+              label: 'menu.notification_tpls',
+              deprecated: true,
+            },
+          ]),
       ],
     },
     {
@@ -129,6 +129,17 @@ export const getMenuList = (embeddedProductMenu: MenuItem[] = [], hideDeprecated
         {
           key: '/datasources',
           label: 'menu.data_source',
+        },
+        {
+          key: 'dbm',
+          label: 'menu.dbm',
+          type: 'tabs',
+          children: [
+            { key: '/dbm', label: 'menu.dbm_instances' },
+            { key: '/dbm/sessions', label: 'menu.dbm_sessions' },
+            { key: '/dbm/slow-queries', label: 'menu.dbm_slow_queries' },
+            { key: '/dbm/sql-query', label: 'menu.dbm_sql_query' },
+          ],
         },
         {
           key: '/components',
