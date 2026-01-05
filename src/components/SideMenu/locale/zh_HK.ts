@@ -41,6 +41,7 @@ const zh_HK = {
     notification_tpls: '通知模板',
     integrations: '集成中心',
     data_source: '數據源',
+    dbm: '數據庫管理',
     built_in_components: '模板中心',
     label_mapping: '標籤詞表',
     embedded_products: '系統集成',

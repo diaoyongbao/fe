@@ -41,6 +41,11 @@ const zh_CN = {
     notification_tpls: '通知模板', // 废弃的
     integrations: '集成中心',
     data_source: '数据源',
+    dbm: '数据库管理',
+    dbm_instances: '实例管理',
+    dbm_sessions: '会话管理',
+    dbm_slow_queries: '慢查询分析',
+    dbm_sql_query: 'SQL查询',
     built_in_components: '模板中心',
     label_mapping: '标签词表',
     embedded_products: '系统集成',
