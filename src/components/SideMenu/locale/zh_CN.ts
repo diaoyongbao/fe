@@ -46,6 +46,7 @@ const zh_CN = {
     dbm_sessions: '会话管理',
     dbm_slow_queries: '慢查询分析',
     dbm_sql_query: 'SQL查询',
+    middleware: '中间件数据源',
     built_in_components: '模板中心',
     label_mapping: '标签词表',
     embedded_products: '系统集成',

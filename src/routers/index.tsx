@@ -74,6 +74,7 @@ import DBMInstanceList from '@/pages/dbm';
 import SessionManagement from '@/pages/dbm/Sessions';
 import SlowQueryAnalysis from '@/pages/dbm/SlowQueries';
 import SQLQueryWorkbench from '@/pages/dbm/SQLQuery';
+import MiddlewareManage from '@/pages/middleware';
 import { dynamicPackages, Entry, dynamicPages } from '@/utils';
 // @ts-ignore
 import { Jobs as StrategyBrain } from 'plus:/datasource/anomaly';
@@ -219,6 +220,9 @@ export default function Content() {
         <Route exact path='/dbm/sessions' component={SessionManagement} />
         <Route exact path='/dbm/slow-queries' component={SlowQueryAnalysis} />
         <Route exact path='/dbm/sql-query' component={SQLQueryWorkbench} />
+
+        {/* 中间件数据源管理路由 */}
+        <Route exact path='/middleware' component={MiddlewareManage} />
 
         {import.meta.env.VITE_IS_ENT !== 'true' && <Route exact path='/system/site-settings' component={SiteSettings} />}
 
