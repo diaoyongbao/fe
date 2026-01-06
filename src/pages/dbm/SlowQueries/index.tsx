@@ -3,14 +3,15 @@ import { Table, Card, Select, Space, message, Button, Modal, Descriptions, Tag, 
 import { ReloadOutlined, DatabaseOutlined, EyeOutlined, LineChartOutlined } from '@ant-design/icons';
 import { useTranslation } from 'react-i18next';
 import { ColumnsType } from 'antd/es/table';
-import { 
-    getArcheryInstances, 
-    getSlowQueries, 
+import {
+    getArcheryInstances,
+    getSlowQueries,
     getSlowQueryDetail,
-    ArcheryInstance, 
+    ArcheryInstance,
     ArcherySlowQuery,
     ArcherySlowQueryDetail
 } from '@/services/dbm';
+import PageLayout from '@/components/pageLayout';
 import './index.less';
 
 const { Option } = Select;
@@ -66,7 +67,7 @@ const SlowQueryAnalysis: React.FC = () => {
     // 查看详情
     const handleViewDetail = async (record: ArcherySlowQuery) => {
         if (!selectedInstance) return;
-        
+
         setDetailVisible(true);
         setDetailLoading(true);
         setCurrentDetail(null);
@@ -189,151 +190,152 @@ const SlowQueryAnalysis: React.FC = () => {
     ];
 
     return (
-        <div className="dbm-slowquery-analysis">
-            <Card
-                title={
-                    <Space>
-                        <LineChartOutlined />
-                        {t('slowquery.title')}
-                    </Space>
-                }
-                extra={
-                    <Space>
-                        <Select
-                            style={{ width: 250 }}
-                            value={selectedInstance}
-                            onChange={setSelectedInstance}
-                            placeholder={t('slowquery.select_instance')}
-                        >
-                            {instances.map((instance) => (
-                                <Option key={instance.id} value={instance.id}>
-                                    {instance.instance_name} ({instance.host}:{instance.port})
-                                </Option>
-                            ))}
-                        </Select>
-                        <Button 
-                            icon={<ReloadOutlined />} 
-                            onClick={fetchSlowQueries}
-                            disabled={!selectedInstance}
-                        >
-                            {t('slowquery.refresh')}
-                        </Button>
-                    </Space>
-                }
-            >
-                <Alert
-                    message={t('slowquery.tip_title')}
-                    description={t('slowquery.tip_content')}
-                    type="info"
-                    showIcon
-                    style={{ marginBottom: 16 }}
-                />
+        <PageLayout title={
+            <Space>
+                <LineChartOutlined />
+                {t('slowquery.title')}
+            </Space>
+        }>
+            <div className="dbm-slowquery-analysis">
+                <Card
+                    extra={
+                        <Space>
+                            <Select
+                                style={{ width: 250 }}
+                                value={selectedInstance}
+                                onChange={setSelectedInstance}
+                                placeholder={t('slowquery.select_instance')}
+                            >
+                                {instances.map((instance) => (
+                                    <Option key={instance.id} value={instance.id}>
+                                        {instance.instance_name} ({instance.host}:{instance.port})
+                                    </Option>
+                                ))}
+                            </Select>
+                            <Button
+                                icon={<ReloadOutlined />}
+                                onClick={fetchSlowQueries}
+                                disabled={!selectedInstance}
+                            >
+                                {t('slowquery.refresh')}
+                            </Button>
+                        </Space>
+                    }
+                >
+                    <Alert
+                        message={t('slowquery.tip_title')}
+                        description={t('slowquery.tip_content')}
+                        type="info"
+                        showIcon
+                        style={{ marginBottom: 16 }}
+                    />
 
-                <Table
-                    columns={columns}
-                    dataSource={slowQueries}
-                    loading={loading}
-                    rowKey="checksum"
-                    pagination={{
-                        showSizeChanger: true,
-                        showQuickJumper: true,
-                        showTotal: (total) => t('slowquery.total_items', { count: total }),
-                        defaultPageSize: 20,
-                        pageSizeOptions: ['10', '20', '50', '100'],
-                    }}
-                    scroll={{ x: 1600 }}
-                />
-            </Card>
+                    <Table
+                        columns={columns}
+                        dataSource={slowQueries}
+                        loading={loading}
+                        rowKey="checksum"
+                        pagination={{
+                            showSizeChanger: true,
+                            showQuickJumper: true,
+                            showTotal: (total) => t('slowquery.total_items', { count: total }),
+                            defaultPageSize: 20,
+                            pageSizeOptions: ['10', '20', '50', '100'],
+                        }}
+                        scroll={{ x: 1600 }}
+                    />
+                </Card>
 
-            {/* 详情Modal */}
-            <Modal
-                title={t('slowquery.detail_title')}
-                visible={detailVisible}
-                onCancel={() => setDetailVisible(false)}
-                footer={null}
-                width={1000}
-                destroyOnClose
-            >
-                {detailLoading ? (
-                    <div style={{ textAlign: 'center', padding: '40px 0' }}>加载中...</div>
-                ) : currentDetail ? (
-                    <Tabs defaultActiveKey="1">
-                        <TabPane tab={t('slowquery.tab_basic')} key="1">
-                            <Descriptions column={2} bordered>
-                                <Descriptions.Item label={t('slowquery.query_time_avg')} span={1}>
-                                    <Tag color="blue">{formatQueryTime(currentDetail.query_time_avg)}</Tag>
-                                </Descriptions.Item>
-                                <Descriptions.Item label={t('slowquery.query_time_max')} span={1}>
-                                    <Tag color="red">{formatQueryTime(currentDetail.query_time_max)}</Tag>
-                                </Descriptions.Item>
-                                <Descriptions.Item label={t('slowquery.query_time_min')} span={1}>
-                                    <Tag color="green">{formatQueryTime(currentDetail.query_time_min)}</Tag>
-                                </Descriptions.Item>
-                                <Descriptions.Item label={t('slowquery.ts_cnt')} span={1}>
-                                    <Tag>{currentDetail.ts_cnt}</Tag>
-                                </Descriptions.Item>
-                                <Descriptions.Item label={t('slowquery.rows_examined_avg')} span={1}>
-                                    {currentDetail.rows_examined_avg.toLocaleString()}
-                                </Descriptions.Item>
-                                <Descriptions.Item label={t('slowquery.rows_sent_avg')} span={1}>
-                                    {currentDetail.rows_sent_avg.toLocaleString()}
-                                </Descriptions.Item>
-                                <Descriptions.Item label={t('slowquery.fingerprint')} span={2}>
-                                    <pre style={{ background: '#f5f5f5', padding: '10px', borderRadius: '4px' }}>
-                                        {currentDetail.fingerprint}
+                {/* 详情Modal */}
+                <Modal
+                    title={t('slowquery.detail_title')}
+                    visible={detailVisible}
+                    onCancel={() => setDetailVisible(false)}
+                    footer={null}
+                    width={1000}
+                    destroyOnClose
+                >
+                    {detailLoading ? (
+                        <div style={{ textAlign: 'center', padding: '40px 0' }}>加载中...</div>
+                    ) : currentDetail ? (
+                        <Tabs defaultActiveKey="1">
+                            <TabPane tab={t('slowquery.tab_basic')} key="1">
+                                <Descriptions column={2} bordered>
+                                    <Descriptions.Item label={t('slowquery.query_time_avg')} span={1}>
+                                        <Tag color="blue">{formatQueryTime(currentDetail.query_time_avg)}</Tag>
+                                    </Descriptions.Item>
+                                    <Descriptions.Item label={t('slowquery.query_time_max')} span={1}>
+                                        <Tag color="red">{formatQueryTime(currentDetail.query_time_max)}</Tag>
+                                    </Descriptions.Item>
+                                    <Descriptions.Item label={t('slowquery.query_time_min')} span={1}>
+                                        <Tag color="green">{formatQueryTime(currentDetail.query_time_min)}</Tag>
+                                    </Descriptions.Item>
+                                    <Descriptions.Item label={t('slowquery.ts_cnt')} span={1}>
+                                        <Tag>{currentDetail.ts_cnt}</Tag>
+                                    </Descriptions.Item>
+                                    <Descriptions.Item label={t('slowquery.rows_examined_avg')} span={1}>
+                                        {currentDetail.rows_examined_avg.toLocaleString()}
+                                    </Descriptions.Item>
+                                    <Descriptions.Item label={t('slowquery.rows_sent_avg')} span={1}>
+                                        {currentDetail.rows_sent_avg.toLocaleString()}
+                                    </Descriptions.Item>
+                                    <Descriptions.Item label={t('slowquery.fingerprint')} span={2}>
+                                        <pre style={{ background: '#f5f5f5', padding: '10px', borderRadius: '4px' }}>
+                                            {currentDetail.fingerprint}
+                                        </pre>
+                                    </Descriptions.Item>
+                                    <Descriptions.Item label={t('slowquery.sample')} span={2}>
+                                        <pre style={{ background: '#f5f5f5', padding: '10px', borderRadius: '4px', maxHeight: '200px', overflow: 'auto' }}>
+                                            {currentDetail.sample}
+                                        </pre>
+                                    </Descriptions.Item>
+                                </Descriptions>
+                            </TabPane>
+
+                            <TabPane tab={t('slowquery.tab_optimization')} key="2">
+                                {currentDetail.optimization_advice && currentDetail.optimization_advice.length > 0 ? (
+                                    <div>
+                                        <h4>{t('slowquery.optimization_advice')}</h4>
+                                        <ul style={{ lineHeight: '2' }}>
+                                            {currentDetail.optimization_advice.map((advice, index) => (
+                                                <li key={index}>
+                                                    <Alert message={advice} type="warning" showIcon style={{ marginBottom: 8 }} />
+                                                </li>
+                                            ))}
+                                        </ul>
+                                    </div>
+                                ) : (
+                                    <Alert message={t('slowquery.no_optimization_advice')} type="info" />
+                                )}
+
+                                {currentDetail.index_advice && currentDetail.index_advice.length > 0 && (
+                                    <div style={{ marginTop: 20 }}>
+                                        <h4>{t('slowquery.index_advice')}</h4>
+                                        <ul style={{ lineHeight: '2' }}>
+                                            {currentDetail.index_advice.map((advice, index) => (
+                                                <li key={index}>
+                                                    <Alert message={advice} type="success" showIcon style={{ marginBottom: 8 }} />
+                                                </li>
+                                            ))}
+                                        </ul>
+                                    </div>
+                                )}
+                            </TabPane>
+
+                            <TabPane tab={t('slowquery.tab_explain')} key="3">
+                                {currentDetail.explain_result ? (
+                                    <pre style={{ background: '#f5f5f5', padding: '15px', borderRadius: '4px', maxHeight: '400px', overflow: 'auto' }}>
+                                        {JSON.stringify(currentDetail.explain_result, null, 2)}
                                     </pre>
-                                </Descriptions.Item>
-                                <Descriptions.Item label={t('slowquery.sample')} span={2}>
-                                    <pre style={{ background: '#f5f5f5', padding: '10px', borderRadius: '4px', maxHeight: '200px', overflow: 'auto' }}>
-                                        {currentDetail.sample}
-                                    </pre>
-                                </Descriptions.Item>
-                            </Descriptions>
-                        </TabPane>
-
-                        <TabPane tab={t('slowquery.tab_optimization')} key="2">
-                            {currentDetail.optimization_advice && currentDetail.optimization_advice.length > 0 ? (
-                                <div>
-                                    <h4>{t('slowquery.optimization_advice')}</h4>
-                                    <ul style={{ lineHeight: '2' }}>
-                                        {currentDetail.optimization_advice.map((advice, index) => (
-                                            <li key={index}>
-                                                <Alert message={advice} type="warning" showIcon style={{ marginBottom: 8 }} />
-                                            </li>
-                                        ))}
-                                    </ul>
-                                </div>
-                            ) : (
-                                <Alert message={t('slowquery.no_optimization_advice')} type="info" />
-                            )}
-
-                            {currentDetail.index_advice && currentDetail.index_advice.length > 0 && (
-                                <div style={{ marginTop: 20 }}>
-                                    <h4>{t('slowquery.index_advice')}</h4>
-                                    <ul style={{ lineHeight: '2' }}>
-                                        {currentDetail.index_advice.map((advice, index) => (
-                                            <li key={index}>
-                                                <Alert message={advice} type="success" showIcon style={{ marginBottom: 8 }} />
-                                            </li>
-                                        ))}
-                                    </ul>
-                                </div>
-                            )}
-                        </TabPane>
-
-                        <TabPane tab={t('slowquery.tab_explain')} key="3">
-                            {currentDetail.explain_result ? (
-                                <pre style={{ background: '#f5f5f5', padding: '15px', borderRadius: '4px', maxHeight: '400px', overflow: 'auto' }}>
-                                    {JSON.stringify(currentDetail.explain_result, null, 2)}
-                                </pre>
-                            ) : (
-                                <Alert message={t('slowquery.no_explain_result')} type="info" />
-                            )}
-                        </TabPane>
-                    </Tabs>
-                ) : null}
-            </Modal>
-        </div>
+                                ) : (
+                                    <Alert message={t('slowquery.no_explain_result')} type="info" />
+                                )}
+                            </TabPane>
+                        </Tabs>
+                    ) : null}
+                </Modal>
+            </div>
+        </PageLayout>
     );
 };
 

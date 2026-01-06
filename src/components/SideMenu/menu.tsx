@@ -140,6 +140,10 @@ export const getMenuList = (embeddedProductMenu: MenuItem[] = [], hideDeprecated
             { key: '/dbm/sessions', label: 'menu.dbm_sessions' },
             { key: '/dbm/slow-queries', label: 'menu.dbm_slow_queries' },
             { key: '/dbm/sql-query', label: 'menu.dbm_sql_query' },
+            { key: '/dbm/uncommitted-trx', label: 'menu.dbm_uncommitted_trx' },
+            { key: '/dbm/locks', label: 'menu.dbm_locks' },
+            { key: '/dbm/sentinel', label: 'menu.dbm_sentinel' },
+            { key: '/dbm/kill-logs', label: 'menu.dbm_kill_logs' },
           ],
         },
         {

@@ -11,6 +11,7 @@ import {
     ArcheryInstance,
     ArcherySQLQueryResult
 } from '@/services/dbm';
+import PageLayout from '@/components/pageLayout';
 import './index.less';
 
 const { Option } = Select;
@@ -53,32 +54,14 @@ const SQLQueryWorkbench: React.FC = () => {
         fetchInstances();
     }, []);
 
-    // 实例变化时获取数据库列表(模拟,实际需要API支持)
-    useEffect(() => {
-        if (selectedInstance) {
-            // 这里应该调用获取数据库列表的API
-            // 暂时硬编码一些常见数据库
-            setDatabases(['information_schema', 'mysql', 'performance_schema', 'sys', 'test']);
-        }
-    }, [selectedInstance]);
-
     // 执行SQL查询
     const handleExecuteQuery = async () => {
-        if (!selectedInstance) {
-            message.warning(t('sqlquery.select_instance_first'));
-            return;
-        }
-        if (!selectedDatabase) {
-            message.warning(t('sqlquery.select_database_first'));
-            return;
-        }
-        if (!sqlContent.trim()) {
-            message.warning(t('sqlquery.input_sql_first'));
+        if (!selectedInstance || !sqlContent.trim()) {
+            message.warning(t('sqlquery.please_input_sql'));
             return;
         }
 
         setLoading(true);
-        setActiveTab('result');
         try {
             const res = await executeSQLQuery({
                 instance_id: selectedInstance,
@@ -93,11 +76,8 @@ const SQLQueryWorkbench: React.FC = () => {
             }
 
             setQueryResult(res.dat);
-            if (res.dat.status === 0) {
-                message.success(t('sqlquery.execute_success'));
-            } else {
-                message.error(res.dat.msg || t('sqlquery.execute_failed'));
-            }
+            setActiveTab('result');
+            message.success(t('sqlquery.execute_success'));
         } catch (error) {
             message.error(t('sqlquery.execute_failed'));
         } finally {
@@ -107,16 +87,8 @@ const SQLQueryWorkbench: React.FC = () => {
 
     // SQL语法检查
     const handleCheckSQL = async () => {
-        if (!selectedInstance) {
-            message.warning(t('sqlquery.select_instance_first'));
-            return;
-        }
-        if (!selectedDatabase) {
-            message.warning(t('sqlquery.select_database_first'));
-            return;
-        }
-        if (!sqlContent.trim()) {
-            message.warning(t('sqlquery.input_sql_first'));
+        if (!selectedInstance || !sqlContent.trim()) {
+            message.warning(t('sqlquery.please_input_sql'));
             return;
         }
 
@@ -133,15 +105,10 @@ const SQLQueryWorkbench: React.FC = () => {
                 return;
             }
 
-            if (res.dat && res.dat.check_result) {
-                if (res.dat.check_result === 'success') {
-                    message.success(t('sqlquery.syntax_check_success'));
-                } else {
-                    Modal.warning({
-                        title: t('sqlquery.syntax_check_failed'),
-                        content: res.dat.error_message || t('sqlquery.syntax_error'),
-                    });
-                }
+            if (res.dat?.is_ok) {
+                message.success(t('sqlquery.check_passed'));
+            } else {
+                message.warning(res.dat?.msg || t('sqlquery.check_warning'));
             }
         } catch (error) {
             message.error(t('sqlquery.check_failed'));
@@ -150,10 +117,10 @@ const SQLQueryWorkbench: React.FC = () => {
         }
     };
 
-    // 提交SQL工单
+    // 提交工单
     const handleSubmitWorkflow = async () => {
         if (!workflowTitle.trim()) {
-            message.warning(t('sqlquery.input_workflow_title'));
+            message.warning(t('sqlquery.workflow_title_required'));
             return;
         }
 
@@ -162,8 +129,8 @@ const SQLQueryWorkbench: React.FC = () => {
                 instance_id: selectedInstance!,
                 db_name: selectedDatabase,
                 sql_content: sqlContent,
-                title: workflowTitle,
-                description: workflowDesc,
+                workflow_name: workflowTitle,
+                demand_url: workflowDesc,
             });
 
             if (res.err) {
@@ -180,15 +147,15 @@ const SQLQueryWorkbench: React.FC = () => {
         }
     };
 
-    // 清空编辑器
+    // 清空
     const handleClear = () => {
         setSqlContent('');
         setQueryResult(null);
     };
 
-    // 动态生成表格列
-    const generateColumns = (): ColumnsType<any> => {
-        if (!queryResult || !queryResult.column_list || queryResult.column_list.length === 0) {
+    // 动态生成结果表格列
+    const getResultColumns = (): ColumnsType<any> => {
+        if (!queryResult?.column_list || queryResult.column_list.length === 0) {
             return [];
         }
 
@@ -202,211 +169,168 @@ const SQLQueryWorkbench: React.FC = () => {
     };
 
     return (
-        <div className="dbm-sql-query-workbench">
-            <Card
-                title={
-                    <Space>
-                        <DatabaseOutlined />
-                        {t('sqlquery.title')}
-                    </Space>
-                }
-                extra={
-                    <Space>
-                        <Select
-                            style={{ width: 250 }}
-                            value={selectedInstance}
-                            onChange={setSelectedInstance}
-                            placeholder={t('sqlquery.select_instance')}
-                        >
-                            {instances.map((instance) => (
-                                <Option key={instance.id} value={instance.id}>
-                                    {instance.instance_name} ({instance.host}:{instance.port})
-                                </Option>
-                            ))}
-                        </Select>
-                        <Select
-                            style={{ width: 180 }}
-                            value={selectedDatabase}
-                            onChange={setSelectedDatabase}
-                            placeholder={t('sqlquery.select_database')}
-                            showSearch
-                        >
-                            {databases.map((db) => (
-                                <Option key={db} value={db}>
-                                    {db}
-                                </Option>
-                            ))}
-                        </Select>
-                    </Space>
-                }
-            >
-                <Space direction="vertical" style={{ width: '100%' }} size="middle">
-                    <Alert
-                        message={t('sqlquery.tip_title')}
-                        description={t('sqlquery.tip_content')}
-                        type="warning"
-                        showIcon
-                    />
+        <PageLayout title={
+            <Space>
+                <DatabaseOutlined />
+                {t('sqlquery.title')}
+            </Space>
+        }>
+            <div className="dbm-sql-query-workbench">
+                <Card
+                    extra={
+                        <Space>
+                            <Select
+                                style={{ width: 250 }}
+                                value={selectedInstance}
+                                onChange={setSelectedInstance}
+                                placeholder={t('sqlquery.select_instance')}
+                            >
+                                {instances.map((instance) => (
+                                    <Option key={instance.id} value={instance.id}>
+                                        {instance.instance_name} ({instance.host}:{instance.port})
+                                    </Option>
+                                ))}
+                            </Select>
+                            <Select
+                                style={{ width: 150 }}
+                                value={selectedDatabase}
+                                onChange={setSelectedDatabase}
+                                placeholder={t('sqlquery.select_database')}
+                                allowClear
+                            >
+                                {databases.map((db) => (
+                                    <Option key={db} value={db}>
+                                        {db}
+                                    </Option>
+                                ))}
+                            </Select>
+                            <span>{t('sqlquery.limit')}:</span>
+                            <InputNumber
+                                min={1}
+                                max={10000}
+                                value={limitNum}
+                                onChange={(val) => setLimitNum(val || 1000)}
+                                style={{ width: 100 }}
+                            />
+                        </Space>
+                    }
+                >
+                    <Space direction="vertical" style={{ width: '100%' }} size="middle">
+                        {/* SQL 输入区域 */}
+                        <div>
+                            <TextArea
+                                value={sqlContent}
+                                onChange={(e) => setSqlContent(e.target.value)}
+                                placeholder={t('sqlquery.sql_placeholder')}
+                                rows={8}
+                                style={{ fontFamily: 'monospace' }}
+                            />
+                        </div>
 
-                    <Card
-                        title={t('sqlquery.sql_editor')}
-                        size="small"
-                        extra={
-                            <Space>
-                                <span>{t('sqlquery.limit')}:</span>
-                                <InputNumber
-                                    min={1}
-                                    max={10000}
-                                    value={limitNum}
-                                    onChange={(val) => setLimitNum(val || 1000)}
-                                    style={{ width: 100 }}
-                                />
-                                <Button icon={<ClearOutlined />} onClick={handleClear}>
-                                    {t('sqlquery.clear')}
-                                </Button>
-                                <Button
-                                    icon={<CheckCircleOutlined />}
-                                    onClick={handleCheckSQL}
-                                    disabled={!selectedInstance || !selectedDatabase || !sqlContent.trim()}
-                                >
-                                    {t('sqlquery.check_syntax')}
-                                </Button>
-                                <Button
-                                    type="primary"
-                                    icon={<PlayCircleOutlined />}
-                                    onClick={handleExecuteQuery}
-                                    loading={loading}
-                                    disabled={!selectedInstance || !selectedDatabase || !sqlContent.trim()}
-                                >
-                                    {t('sqlquery.execute')}
-                                </Button>
-                                <Button
-                                    icon={<FileTextOutlined />}
-                                    onClick={() => setWorkflowVisible(true)}
-                                    disabled={!selectedInstance || !selectedDatabase || !sqlContent.trim()}
-                                >
-                                    {t('sqlquery.submit_workflow')}
-                                </Button>
-                            </Space>
-                        }
-                    >
-                        <TextArea
-                            value={sqlContent}
-                            onChange={(e) => setSqlContent(e.target.value)}
-                            placeholder={t('sqlquery.sql_placeholder')}
-                            rows={10}
-                            style={{
-                                fontFamily: 'Consolas, Monaco, "Courier New", monospace',
-                                fontSize: '14px'
-                            }}
-                        />
-                    </Card>
+                        {/* 操作按钮 */}
+                        <Space>
+                            <Button
+                                type="primary"
+                                icon={<PlayCircleOutlined />}
+                                onClick={handleExecuteQuery}
+                                loading={loading}
+                            >
+                                {t('sqlquery.execute')}
+                            </Button>
+                            <Button
+                                icon={<CheckCircleOutlined />}
+                                onClick={handleCheckSQL}
+                                loading={loading}
+                            >
+                                {t('sqlquery.check')}
+                            </Button>
+                            <Button
+                                icon={<FileTextOutlined />}
+                                onClick={() => setWorkflowVisible(true)}
+                                disabled={!sqlContent.trim()}
+                            >
+                                {t('sqlquery.submit_workflow')}
+                            </Button>
+                            <Button icon={<ClearOutlined />} onClick={handleClear}>
+                                {t('sqlquery.clear')}
+                            </Button>
+                        </Space>
 
-                    <Card title={t('sqlquery.query_result')} size="small">
+                        {/* 结果展示区域 */}
                         <Tabs activeKey={activeTab} onChange={setActiveTab}>
                             <TabPane tab={t('sqlquery.tab_result')} key="result">
                                 {queryResult ? (
                                     <div>
-                                        <Space style={{ marginBottom: 16 }}>
-                                            <Tag color={queryResult.status === 0 ? 'success' : 'error'}>
-                                                {queryResult.status === 0 ? t('sqlquery.status_success') : t('sqlquery.status_failed')}
-                                            </Tag>
-                                            {queryResult.affected_rows !== undefined && (
-                                                <Tag color="blue">
-                                                    {t('sqlquery.affected_rows')}: {queryResult.affected_rows}
-                                                </Tag>
-                                            )}
-                                            {queryResult.rows && (
-                                                <Tag color="green">
-                                                    {t('sqlquery.return_rows')}: {queryResult.rows.length}
-                                                </Tag>
-                                            )}
-                                        </Space>
-
-                                        {queryResult.msg && queryResult.status !== 0 && (
-                                            <Alert
-                                                message={t('sqlquery.error_message')}
-                                                description={queryResult.msg}
-                                                type="error"
-                                                style={{ marginBottom: 16 }}
-                                            />
-                                        )}
-
-                                        {queryResult.rows && queryResult.rows.length > 0 ? (
-                                            <Table
-                                                columns={generateColumns()}
-                                                dataSource={queryResult.rows}
-                                                rowKey={(record, index) => index?.toString() || '0'}
-                                                pagination={{
-                                                    showSizeChanger: true,
-                                                    showQuickJumper: true,
-                                                    showTotal: (total) => t('sqlquery.total_rows', { count: total }),
-                                                    defaultPageSize: 50,
-                                                    pageSizeOptions: ['20', '50', '100', '200'],
-                                                }}
-                                                scroll={{ x: 'max-content', y: 400 }}
-                                                size="small"
-                                            />
-                                        ) : queryResult.status === 0 ? (
-                                            <Alert message={t('sqlquery.no_result')} type="info" />
-                                        ) : null}
+                                        <Alert
+                                            message={
+                                                <Space>
+                                                    <span>{t('sqlquery.affected_rows')}: {queryResult.affected_rows}</span>
+                                                    <span>|</span>
+                                                    <span>{t('sqlquery.query_time')}: {queryResult.query_time}s</span>
+                                                </Space>
+                                            }
+                                            type="info"
+                                            style={{ marginBottom: 16 }}
+                                        />
+                                        <Table
+                                            columns={getResultColumns()}
+                                            dataSource={queryResult.rows?.map((row, idx) => ({ ...row, _key: idx })) || []}
+                                            rowKey="_key"
+                                            pagination={{
+                                                showSizeChanger: true,
+                                                showQuickJumper: true,
+                                                defaultPageSize: 20,
+                                            }}
+                                            scroll={{ x: 'max-content' }}
+                                            size="small"
+                                        />
                                     </div>
                                 ) : (
-                                    <Alert message={t('sqlquery.no_query_executed')} type="info" />
+                                    <Alert message={t('sqlquery.no_result')} type="info" />
                                 )}
                             </TabPane>
-
-                            <TabPane tab={t('sqlquery.tab_sql')} key="sql">
-                                {queryResult && queryResult.full_sql ? (
-                                    <pre style={{
-                                        background: '#f5f5f5',
-                                        padding: '15px',
-                                        borderRadius: '4px',
-                                        maxHeight: '400px',
-                                        overflow: 'auto'
-                                    }}>
-                                        {queryResult.full_sql}
-                                    </pre>
+                            <TabPane tab={t('sqlquery.tab_messages')} key="messages">
+                                {queryResult?.error ? (
+                                    <Alert message={queryResult.error} type="error" />
                                 ) : (
-                                    <Alert message={t('sqlquery.no_sql')} type="info" />
+                                    <Alert message={t('sqlquery.no_messages')} type="info" />
                                 )}
                             </TabPane>
                         </Tabs>
-                    </Card>
-                </Space>
-            </Card>
+                    </Space>
+                </Card>
 
-            {/* 工单提交Modal */}
-            <Modal
-                title={t('sqlquery.submit_workflow')}
-                visible={workflowVisible}
-                onOk={handleSubmitWorkflow}
-                onCancel={() => setWorkflowVisible(false)}
-                okText={t('sqlquery.submit')}
-                cancelText={t('sqlquery.cancel')}
-            >
-                <Space direction="vertical" style={{ width: '100%' }}>
-                    <div>
-                        <label>{t('sqlquery.workflow_title')}:</label>
-                        <TextArea
-                            value={workflowTitle}
-                            onChange={(e) => setWorkflowTitle(e.target.value)}
-                            placeholder={t('sqlquery.workflow_title_placeholder')}
-                            rows={2}
-                        />
-                    </div>
-                    <div>
-                        <label>{t('sqlquery.workflow_desc')}:</label>
-                        <TextArea
-                            value={workflowDesc}
-                            onChange={(e) => setWorkflowDesc(e.target.value)}
-                            placeholder={t('sqlquery.workflow_desc_placeholder')}
-                            rows={4}
-                        />
-                    </div>
-                </Space>
-            </Modal>
-        </div>
+                {/* 提交工单弹窗 */}
+                <Modal
+                    title={t('sqlquery.submit_workflow')}
+                    visible={workflowVisible}
+                    onOk={handleSubmitWorkflow}
+                    onCancel={() => setWorkflowVisible(false)}
+                    okText={t('sqlquery.submit')}
+                    cancelText={t('sessions.cancel')}
+                >
+                    <Space direction="vertical" style={{ width: '100%' }} size="middle">
+                        <div>
+                            <div style={{ marginBottom: 8 }}>{t('sqlquery.workflow_title')}</div>
+                            <Input
+                                value={workflowTitle}
+                                onChange={(e) => setWorkflowTitle(e.target.value)}
+                                placeholder={t('sqlquery.workflow_title_placeholder')}
+                            />
+                        </div>
+                        <div>
+                            <div style={{ marginBottom: 8 }}>{t('sqlquery.workflow_desc')}</div>
+                            <TextArea
+                                value={workflowDesc}
+                                onChange={(e) => setWorkflowDesc(e.target.value)}
+                                placeholder={t('sqlquery.workflow_desc_placeholder')}
+                                rows={4}
+                            />
+                        </div>
+                    </Space>
+                </Modal>
+            </div>
+        </PageLayout>
     );
 };
 
