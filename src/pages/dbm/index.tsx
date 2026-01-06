@@ -4,6 +4,7 @@ import { ReloadOutlined, DatabaseOutlined } from '@ant-design/icons';
 import { useTranslation } from 'react-i18next';
 import { ColumnsType } from 'antd/es/table';
 import { getArcheryInstances, checkArcheryHealth, ArcheryInstance } from '@/services/dbm';
+import PageLayout from '@/components/pageLayout';
 import './index.less';
 
 const { Search } = Input;
@@ -151,67 +152,72 @@ const DBMInstanceList: React.FC = () => {
     ];
 
     return (
-        <div className="dbm-instance-list">
-            <Card
-                title={
-                    <Space>
-                        <DatabaseOutlined />
-                        {t('title')}
-                        {healthStatus && (
-                            <Tag color={healthStatus === 'ok' ? 'success' : 'error'}>
-                                {healthStatus === 'ok' ? t('service_online') : t('service_offline')}
-                            </Tag>
-                        )}
-                    </Space>
-                }
-                extra={
-                    <Space>
-                        <Button icon={<ReloadOutlined />} onClick={() => { fetchInstances(); checkHealth(); }}>
-                            {t('refresh')}
-                        </Button>
-                    </Space>
-                }
-            >
-                <Space direction="vertical" style={{ width: '100%' }} size="middle">
-                    <Space>
-                        <Search
-                            placeholder={t('search_placeholder')}
-                            allowClear
-                            style={{ width: 300 }}
-                            onChange={(e) => setSearchText(e.target.value)}
-                        />
-                        <Select
-                            style={{ width: 150 }}
-                            value={typeFilter}
-                            onChange={setTypeFilter}
-                            placeholder={t('filter_by_type')}
-                        >
-                            <Option value="all">{t('all_types')}</Option>
-                            {dbTypes.map((type) => (
-                                <Option key={type} value={type}>
-                                    {type.toUpperCase()}
-                                </Option>
-                            ))}
-                        </Select>
-                    </Space>
+        <PageLayout title={
+            <Space>
+                <DatabaseOutlined />
+                {t('title')}
+            </Space>
+        }>
+            <div className="dbm-instance-list">
+                <Card
+                    title={
+                        <Space>
+                            {healthStatus && (
+                                <Tag color={healthStatus === 'ok' ? 'success' : 'error'}>
+                                    {healthStatus === 'ok' ? t('service_online') : t('service_offline')}
+                                </Tag>
+                            )}
+                        </Space>
+                    }
+                    extra={
+                        <Space>
+                            <Button icon={<ReloadOutlined />} onClick={() => { fetchInstances(); checkHealth(); }}>
+                                {t('refresh')}
+                            </Button>
+                        </Space>
+                    }
+                >
+                    <Space direction="vertical" style={{ width: '100%' }} size="middle">
+                        <Space>
+                            <Search
+                                placeholder={t('search_placeholder')}
+                                allowClear
+                                style={{ width: 300 }}
+                                onChange={(e) => setSearchText(e.target.value)}
+                            />
+                            <Select
+                                style={{ width: 150 }}
+                                value={typeFilter}
+                                onChange={setTypeFilter}
+                                placeholder={t('filter_by_type')}
+                            >
+                                <Option value="all">{t('all_types')}</Option>
+                                {dbTypes.map((type) => (
+                                    <Option key={type} value={type}>
+                                        {type.toUpperCase()}
+                                    </Option>
+                                ))}
+                            </Select>
+                        </Space>
 
-                    <Table
-                        columns={columns}
-                        dataSource={filteredData}
-                        loading={loading}
-                        rowKey="id"
-                        pagination={{
-                            showSizeChanger: true,
-                            showQuickJumper: true,
-                            showTotal: (total) => t('total_items', { count: total }),
-                            defaultPageSize: 20,
-                            pageSizeOptions: ['10', '20', '50', '100'],
-                        }}
-                        scroll={{ x: 1200 }}
-                    />
-                </Space>
-            </Card>
-        </div>
+                        <Table
+                            columns={columns}
+                            dataSource={filteredData}
+                            loading={loading}
+                            rowKey="id"
+                            pagination={{
+                                showSizeChanger: true,
+                                showQuickJumper: true,
+                                showTotal: (total) => t('total_items', { count: total }),
+                                defaultPageSize: 20,
+                                pageSizeOptions: ['10', '20', '50', '100'],
+                            }}
+                            scroll={{ x: 1200 }}
+                        />
+                    </Space>
+                </Card>
+            </div>
+        </PageLayout>
     );
 };
 

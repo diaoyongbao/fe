@@ -74,6 +74,10 @@ import DBMInstanceList from '@/pages/dbm';
 import SessionManagement from '@/pages/dbm/Sessions';
 import SlowQueryAnalysis from '@/pages/dbm/SlowQueries';
 import SQLQueryWorkbench from '@/pages/dbm/SQLQuery';
+import UncommittedTrx from '@/pages/dbm/UncommittedTrx';
+import Locks from '@/pages/dbm/Locks';
+import Sentinel from '@/pages/dbm/Sentinel';
+import KillLogs from '@/pages/dbm/KillLogs';
 import MiddlewareManage from '@/pages/middleware';
 import { dynamicPackages, Entry, dynamicPages } from '@/utils';
 // @ts-ignore
@@ -220,6 +224,10 @@ export default function Content() {
         <Route exact path='/dbm/sessions' component={SessionManagement} />
         <Route exact path='/dbm/slow-queries' component={SlowQueryAnalysis} />
         <Route exact path='/dbm/sql-query' component={SQLQueryWorkbench} />
+        <Route exact path='/dbm/uncommitted-trx' component={UncommittedTrx} />
+        <Route exact path='/dbm/locks' component={Locks} />
+        <Route exact path='/dbm/sentinel' component={Sentinel} />
+        <Route exact path='/dbm/kill-logs' component={KillLogs} />
 
         {/* 中间件数据源管理路由 */}
         <Route exact path='/middleware' component={MiddlewareManage} />

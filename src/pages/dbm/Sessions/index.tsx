@@ -3,13 +3,14 @@ import { Table, Card, Input, Select, Space, message, Button, Modal, Tag, Tooltip
 import { ReloadOutlined, DeleteOutlined, ExclamationCircleOutlined, DatabaseOutlined } from '@ant-design/icons';
 import { useTranslation } from 'react-i18next';
 import { ColumnsType } from 'antd/es/table';
-import { 
-    getArcheryInstances, 
-    getSessions, 
-    killSessions, 
-    ArcheryInstance, 
-    ArcherySession 
+import {
+    getArcheryInstances,
+    getSessions,
+    killSessions,
+    ArcheryInstance,
+    ArcherySession
 } from '@/services/dbm';
+import PageLayout from '@/components/pageLayout';
 import './index.less';
 
 const { Search } = Input;
@@ -119,19 +120,19 @@ const SessionManagement: React.FC = () => {
             okType: 'danger',
             onOk: async () => {
                 if (!selectedInstance) return;
-                
+
                 try {
                     const threadIds = selectedRowKeys.map((key) => Number(key));
                     const res = await killSessions({
                         instance_id: selectedInstance,
                         thread_ids: threadIds,
                     });
-                    
+
                     if (res.err) {
                         message.error(res.err);
                         return;
                     }
-                    
+
                     message.success(t('sessions.kill_success', { count: threadIds.length }));
                     setSelectedRowKeys([]);
                     fetchSessions();
@@ -242,101 +243,102 @@ const SessionManagement: React.FC = () => {
     };
 
     return (
-        <div className="dbm-session-management">
-            <Card
-                title={
-                    <Space>
-                        <DatabaseOutlined />
-                        {t('sessions.title')}
-                    </Space>
-                }
-                extra={
-                    <Space>
-                        <Select
-                            style={{ width: 250 }}
-                            value={selectedInstance}
-                            onChange={setSelectedInstance}
-                            placeholder={t('sessions.select_instance')}
-                        >
-                            {instances.map((instance) => (
-                                <Option key={instance.id} value={instance.id}>
-                                    {instance.instance_name} ({instance.host}:{instance.port})
-                                </Option>
-                            ))}
-                        </Select>
-                        <Button 
-                            icon={<ReloadOutlined />} 
-                            onClick={fetchSessions}
-                            disabled={!selectedInstance}
-                        >
-                            {t('sessions.refresh')}
-                        </Button>
-                        <Button
-                            type="primary"
-                            danger
-                            icon={<DeleteOutlined />}
-                            onClick={handleKillSessions}
-                            disabled={selectedRowKeys.length === 0}
-                        >
-                            {t('sessions.kill_selected')} ({selectedRowKeys.length})
-                        </Button>
-                    </Space>
-                }
-            >
-                <Space direction="vertical" style={{ width: '100%' }} size="middle">
-                    <Space>
-                        <Search
-                            placeholder={t('sessions.search_placeholder')}
-                            allowClear
-                            style={{ width: 300 }}
-                            onChange={(e) => setSearchText(e.target.value)}
-                        />
-                        <Select
-                            style={{ width: 150 }}
-                            value={commandFilter}
-                            onChange={setCommandFilter}
-                            placeholder={t('sessions.filter_by_command')}
-                        >
-                            <Option value="all">{t('sessions.all_commands')}</Option>
-                            {commands.map((cmd) => (
-                                <Option key={cmd} value={cmd}>
-                                    {cmd}
-                                </Option>
-                            ))}
-                        </Select>
-                        <Select
-                            style={{ width: 150 }}
-                            value={userFilter}
-                            onChange={setUserFilter}
-                            placeholder={t('sessions.filter_by_user')}
-                        >
-                            <Option value="all">{t('sessions.all_users')}</Option>
-                            {users.map((user) => (
-                                <Option key={user} value={user}>
-                                    {user}
-                                </Option>
-                            ))}
-                        </Select>
-                    </Space>
+        <PageLayout title={
+            <Space>
+                <DatabaseOutlined />
+                {t('sessions.title')}
+            </Space>
+        }>
+            <div className="dbm-session-management">
+                <Card
+                    extra={
+                        <Space>
+                            <Select
+                                style={{ width: 250 }}
+                                value={selectedInstance}
+                                onChange={setSelectedInstance}
+                                placeholder={t('sessions.select_instance')}
+                            >
+                                {instances.map((instance) => (
+                                    <Option key={instance.id} value={instance.id}>
+                                        {instance.instance_name} ({instance.host}:{instance.port})
+                                    </Option>
+                                ))}
+                            </Select>
+                            <Button
+                                icon={<ReloadOutlined />}
+                                onClick={fetchSessions}
+                                disabled={!selectedInstance}
+                            >
+                                {t('sessions.refresh')}
+                            </Button>
+                            <Button
+                                type="primary"
+                                danger
+                                icon={<DeleteOutlined />}
+                                onClick={handleKillSessions}
+                                disabled={selectedRowKeys.length === 0}
+                            >
+                                {t('sessions.kill_selected')} ({selectedRowKeys.length})
+                            </Button>
+                        </Space>
+                    }
+                >
+                    <Space direction="vertical" style={{ width: '100%' }} size="middle">
+                        <Space>
+                            <Search
+                                placeholder={t('sessions.search_placeholder')}
+                                allowClear
+                                style={{ width: 300 }}
+                                onChange={(e) => setSearchText(e.target.value)}
+                            />
+                            <Select
+                                style={{ width: 150 }}
+                                value={commandFilter}
+                                onChange={setCommandFilter}
+                                placeholder={t('sessions.filter_by_command')}
+                            >
+                                <Option value="all">{t('sessions.all_commands')}</Option>
+                                {commands.map((cmd) => (
+                                    <Option key={cmd} value={cmd}>
+                                        {cmd}
+                                    </Option>
+                                ))}
+                            </Select>
+                            <Select
+                                style={{ width: 150 }}
+                                value={userFilter}
+                                onChange={setUserFilter}
+                                placeholder={t('sessions.filter_by_user')}
+                            >
+                                <Option value="all">{t('sessions.all_users')}</Option>
+                                {users.map((user) => (
+                                    <Option key={user} value={user}>
+                                        {user}
+                                    </Option>
+                                ))}
+                            </Select>
+                        </Space>
 
-                    <Table
-                        columns={columns}
-                        dataSource={filteredSessions}
-                        loading={loading}
-                        rowKey="id"
-                        rowSelection={rowSelection}
-                        pagination={{
-                            showSizeChanger: true,
-                            showQuickJumper: true,
-                            showTotal: (total) => t('sessions.total_items', { count: total }),
-                            defaultPageSize: 20,
-                            pageSizeOptions: ['10', '20', '50', '100'],
-                        }}
-                        scroll={{ x: 1400 }}
-                    />
-                </Space>
-            </Card>
-        </div>
+                        <Table
+                            columns={columns}
+                            dataSource={filteredSessions}
+                            loading={loading}
+                            rowKey="id"
+                            rowSelection={rowSelection}
+                            pagination={{
+                                showSizeChanger: true,
+                                showQuickJumper: true,
+                                showTotal: (total) => t('sessions.total_items', { count: total }),
+                                defaultPageSize: 20,
+                                pageSizeOptions: ['10', '20', '50', '100'],
+                            }}
+                            scroll={{ x: 1400 }}
+                        />
+                    </Space>
+                </Card>
+            </div>
+        </PageLayout>
     );
 };
 
