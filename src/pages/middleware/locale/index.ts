@@ -1,13 +1,11 @@
 import en_US from './en_US';
 import zh_CN from './zh_CN';
-import zh_HK from './zh_HK';
 
 const resources = {
-    dbm: {
-        en_US,
-        zh_CN,
-        zh_HK,
-    },
+  middleware: {
+    en_US,
+    zh_CN,
+  },
 };
 
 export default resources;

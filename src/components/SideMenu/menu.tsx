@@ -133,6 +133,7 @@ export const getMenuList = (embeddedProductMenu: MenuItem[] = [], hideDeprecated
         {
           key: 'dbm',
           label: 'menu.dbm',
+          role: ['Admin'],
           type: 'tabs',
           children: [
             { key: '/dbm', label: 'menu.dbm_instances' },
@@ -140,6 +141,11 @@ export const getMenuList = (embeddedProductMenu: MenuItem[] = [], hideDeprecated
             { key: '/dbm/slow-queries', label: 'menu.dbm_slow_queries' },
             { key: '/dbm/sql-query', label: 'menu.dbm_sql_query' },
           ],
+        },
+        {
+          key: '/middleware',
+          label: 'menu.middleware',
+          role: ['Admin'],
         },
         {
           key: '/components',

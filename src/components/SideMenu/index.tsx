@@ -39,7 +39,7 @@ interface SideMenuProps {
 
 const SideMenu = (props: SideMenuProps) => {
   const { i18n } = useTranslation('sideMenu');
-  const { darkMode, perms, installTs } = useContext(CommonStateContext);
+  const { darkMode, perms, installTs, profile } = useContext(CommonStateContext);
   let { sideMenuBgMode } = useContext(CommonStateContext);
   if (darkMode) {
     sideMenuBgMode = 'dark';
@@ -62,7 +62,7 @@ const SideMenu = (props: SideMenuProps) => {
   const [selectedKeys, setSelectedKeys] = useState<string[]>();
   const [collapsed, setCollapsed] = useState<boolean>(Number(localStorage.getItem('menuCollapsed')) === 1);
   const [collapsedHover, setCollapsedHover] = useState<boolean>(false);
-  const quickMenuRef = useRef<{ open: () => void }>({ open: () => {} });
+  const quickMenuRef = useRef<{ open: () => void }>({ open: () => { } });
   const isCustomBg = sideMenuBgMode !== 'light';
   const [embeddedProductMenu, setEmbeddedProductMenu] = useState<MenuItem[]>([]);
   const [menus, setMenus] = useState<MenuItem[]>([]);
@@ -122,26 +122,52 @@ const SideMenu = (props: SideMenuProps) => {
   }, [hideSideMenu]);
 
   useEffect(() => {
+    // 安全地获取用户角色，防止 profile 未加载时报错
+    const userRoles = (profile && profile.roles) ? profile.roles : [];
+
+    // 如果菜单数据或权限数据还没准备好，先不渲染或渲染空菜单
+    if (!menuList) return;
+
     const filteredMenus = menuList
       .map((menu) => {
+        if (!menu || !menu.children) return null; // 额外的安全检查
+
         const filteredChildren = menu.children
           .map((child) => {
+            if (!child) return null;
+
             if (child.key.startsWith(`${embeddedProductDetailPath}/`)) {
               return child;
             }
             if (menu.key === '/flashduty') {
-              if (perms?.includes('/flashduty')) {
+              if (perms && perms.includes('/flashduty')) {
                 return child;
               }
             }
+            // Check role attribute first - if role matches, return immediately
+            if (child.role && child.role.length > 0) {
+              const hasRole = child.role.some((role) => userRoles.includes(role));
+              if (hasRole) {
+                return child; // Role matches, return immediately without perms check
+              }
+              return null; // Role defined but doesn't match
+            }
             if (child.type === 'tabs' && child.children) {
-              const filteredTabs = child.children.filter((tab) => perms?.includes(tab.key));
+              const filteredTabs = child.children.filter((tab) => {
+                if (!tab) return false;
+                // Check role for tabs
+                if (tab.role && tab.role.length > 0) {
+                  return tab.role.some((role) => userRoles.includes(role));
+                }
+                return perms && perms.includes(tab.key);
+              });
               if (filteredTabs.length > 0) {
                 return { ...child, children: filteredTabs };
               }
               return null;
             }
-            return perms?.includes(calcUrlPath(child.key)) ? child : null;
+            // perms 也要做空检查
+            return (perms && perms.includes(calcUrlPath(child.key))) ? child : null;
           })
           .filter(Boolean);
 
@@ -153,7 +179,7 @@ const SideMenu = (props: SideMenuProps) => {
       .filter(Boolean) as MenuItem[];
 
     setMenus(filteredMenus);
-  }, [i18n.language, embeddedProductMenu]);
+  }, [i18n.language, embeddedProductMenu, profile, perms]); // 添加 perms 到依赖列表，确保权限加载后重新渲染
 
   const menuPaths = useMemo(
     () =>

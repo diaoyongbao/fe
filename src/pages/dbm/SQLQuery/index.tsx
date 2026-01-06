@@ -1,10 +1,10 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Card, Select, Space, message, Button, Table, Tag, Alert, Tabs, InputNumber, Modal } from 'antd';
+import { Card, Select, Space, message, Button, Table, Tag, Alert, Tabs, InputNumber, Modal, Input } from 'antd';
 import { PlayCircleOutlined, CheckCircleOutlined, DatabaseOutlined, ClearOutlined, FileTextOutlined } from '@ant-design/icons';
 import { useTranslation } from 'react-i18next';
 import { ColumnsType } from 'antd/es/table';
-import { 
-    getArcheryInstances, 
+import {
+    getArcheryInstances,
     executeSQLQuery,
     checkSQL,
     submitSQLWorkflow,
@@ -15,7 +15,7 @@ import './index.less';
 
 const { Option } = Select;
 const { TabPane } = Tabs;
-const { TextArea } = require('antd/lib/input');
+const { TextArea } = Input;
 
 const SQLQueryWorkbench: React.FC = () => {
     const { t } = useTranslation('dbm');
@@ -248,7 +248,7 @@ const SQLQueryWorkbench: React.FC = () => {
                         showIcon
                     />
 
-                    <Card 
+                    <Card
                         title={t('sqlquery.sql_editor')}
                         size="small"
                         extra={
@@ -264,8 +264,8 @@ const SQLQueryWorkbench: React.FC = () => {
                                 <Button icon={<ClearOutlined />} onClick={handleClear}>
                                     {t('sqlquery.clear')}
                                 </Button>
-                                <Button 
-                                    icon={<CheckCircleOutlined />} 
+                                <Button
+                                    icon={<CheckCircleOutlined />}
                                     onClick={handleCheckSQL}
                                     disabled={!selectedInstance || !selectedDatabase || !sqlContent.trim()}
                                 >
@@ -295,7 +295,7 @@ const SQLQueryWorkbench: React.FC = () => {
                             onChange={(e) => setSqlContent(e.target.value)}
                             placeholder={t('sqlquery.sql_placeholder')}
                             rows={10}
-                            style={{ 
+                            style={{
                                 fontFamily: 'Consolas, Monaco, "Courier New", monospace',
                                 fontSize: '14px'
                             }}
@@ -358,9 +358,9 @@ const SQLQueryWorkbench: React.FC = () => {
 
                             <TabPane tab={t('sqlquery.tab_sql')} key="sql">
                                 {queryResult && queryResult.full_sql ? (
-                                    <pre style={{ 
-                                        background: '#f5f5f5', 
-                                        padding: '15px', 
+                                    <pre style={{
+                                        background: '#f5f5f5',
+                                        padding: '15px',
                                         borderRadius: '4px',
                                         maxHeight: '400px',
                                         overflow: 'auto'

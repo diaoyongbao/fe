@@ -198,7 +198,7 @@ const TimeSeriesBarChart: React.FC<TimeSeriesBarChartProps> = ({ darkMode, data,
       if (!onBarClick) return;
 
       // 使用 snap 记录获取最近的柱子数据
-      const records = chart.getDataByXY({ x: event.x, y: event.y }, { shared: stacked }) || [];
+      const records = (chart as any).getDataByXY({ x: event.x, y: event.y }, { shared: stacked }) || [];
       if (!records.length) return;
 
       const clickedData = records[0];
