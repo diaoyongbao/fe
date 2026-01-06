@@ -31,37 +31,6 @@ export const TabMenu: React.FC<TabMenuProps> = ({ currentMenu, onTabChange }) =>
     }
   }, [currentMenu]);
 
-  // 临时修复：手动渲染 DBM Tabs
-  if (window.location.pathname.startsWith('/dbm')) {
-    const dbmTabs = [
-      { key: '/dbm', label: 'menu.dbm_instances' },
-      { key: '/dbm/sessions', label: 'menu.dbm_sessions' },
-      { key: '/dbm/slow-queries', label: 'menu.dbm_slow_queries' },
-      { key: '/dbm/sql-query', label: 'menu.dbm_sql_query' },
-      { key: '/dbm/uncommitted-trx', label: 'menu.dbm_uncommitted_trx' },
-      { key: '/dbm/locks', label: 'menu.dbm_locks' },
-      { key: '/dbm/sentinel', label: 'menu.dbm_sentinel' },
-      { key: '/dbm/kill-logs', label: 'menu.dbm_kill_logs' },
-    ];
-
-    return (
-      <div className='flex items-center gap-0 h-[50px] -mt-[10px] -mb-[10px] border-b border-fc-200'>
-        {_.map(dbmTabs, (item) => (
-          <div
-            key={item.key}
-            className={`relative px-5 h-full header-tab-menu flex items-center cursor-pointer text-sm transition-colors duration-300 ${window.location.pathname === item.key ? 'text-primary custom-tab-active bg-gray-200/20' : ''
-              }`}
-            onClick={() => {
-              history.push(item.key);
-            }}
-          >
-            {t(item.label)}
-          </div>
-        ))}
-      </div>
-    );
-  }
-
   if (!currentMenu?.showTabs || !currentMenu?.parentItem?.children) {
     return null;
   }

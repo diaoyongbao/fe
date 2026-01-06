@@ -170,31 +170,7 @@ const PageLayout: React.FC<IPageLayoutProps> = ({ icon, title, rightArea, introI
                       {title}
                     </div>
                   )}
-                  {location.pathname.startsWith('/dbm') ? (
-                    <div className='flex items-center gap-0 h-[50px] -mt-[10px] -mb-[10px] border-b border-fc-200'>
-                      {[
-                        { key: '/dbm', label: '实例列表' },
-                        { key: '/dbm/sessions', label: '会话管理' },
-                        { key: '/dbm/slow-queries', label: '慢查询分析' },
-                        { key: '/dbm/sql-query', label: 'SQL查询' },
-                        { key: '/dbm/uncommitted-trx', label: '未提交事务' },
-                        { key: '/dbm/locks', label: '锁信息' },
-                        { key: '/dbm/sentinel', label: 'DBA哨兵' },
-                        { key: '/dbm/kill-logs', label: 'Kill日志' },
-                      ].map((item) => (
-                        <div
-                          key={item.key}
-                          className={`relative px-5 h-full header-tab-menu flex items-center cursor-pointer text-sm transition-colors duration-300 ${location.pathname === item.key ? 'text-primary custom-tab-active bg-gray-200/20' : ''
-                            }`}
-                          onClick={() => history.push(item.key)}
-                        >
-                          {item.label}
-                        </div>
-                      ))}
-                    </div>
-                  ) : (
-                    <TabMenu currentMenu={currentMenu} />
-                  )}
+                  <TabMenu currentMenu={currentMenu} />
                   {IS_ENT && doc && <DocLink link={doc} />}
                 </div>
 
