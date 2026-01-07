@@ -36,9 +36,9 @@ const Locks: React.FC = () => {
                 message.error(res.err);
                 return;
             }
-            setInstances(res.dat || []);
-            if (res.dat && res.dat.length > 0) {
-                setSelectedInstance(res.dat[0].id);
+            setInstances(res.dat?.list || []);
+            if (res.dat?.list && res.dat.list.length > 0) {
+                setSelectedInstance(res.dat.list[0].id);
             }
         } catch (error) {
             message.error(t('locks.fetch_instances_failed'));

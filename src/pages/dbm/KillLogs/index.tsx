@@ -35,7 +35,7 @@ const KillLogs: React.FC = () => {
         try {
             const res = await getArcheryInstances();
             if (!res.err) {
-                setInstances(res.dat || []);
+                setInstances(res.dat?.list || []);
             }
         } catch (error) {
             console.error('Failed to fetch instances:', error);
