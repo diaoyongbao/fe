@@ -185,6 +185,14 @@ const zh_CN = {
         check_passed: 'SQL语法检查通过',
         check_warning: 'SQL语法存在警告',
         workflow_title_required: '请输入工单标题',
+        tables: '表',
+        no_tables: '暂无表',
+        search_tables: '搜索表...',
+        refresh_tables: '刷新表列表',
+        loading_columns: '加载列信息中...',
+        columns: '列',
+        rows: '行数',
+        engine: '引擎',
     },
 
     // 未提交事务

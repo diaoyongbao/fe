@@ -1,25 +1,107 @@
 .dbm-sql-query-workbench {
-  padding: 24px;
+  padding: 16px;
   background-color: #f0f2f5;
-  min-height: 100%;
+  height: calc(100vh - 100px);
+  overflow: hidden;
 
-  .ant-card {
+  .dbm-sql-query-container {
+    display: flex;
+    height: 100%;
+    gap: 16px;
+  }
+
+  .dbm-sql-query-sidebar {
+    width: 260px;
+    min-width: 260px;
+    background: #fff;
     border-radius: 8px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-    border: none;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 1px 2px -2px rgba(0, 0, 0, 0.16), 0 3px 6px 0 rgba(0, 0, 0, 0.12), 0 5px 12px 4px rgba(0, 0, 0, 0.09);
+    border: 1px solid #f0f0f0;
 
-    .ant-card-head {
+    .sidebar-header {
+      padding: 12px;
       border-bottom: 1px solid #f0f0f0;
-      padding: 0 24px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: #fafafa;
+      border-radius: 8px 8px 0 0;
     }
 
-    .ant-card-body {
-      padding: 24px;
+    .sidebar-content {
+      flex: 1;
+      overflow-y: auto;
+      padding: 8px 0;
+
+      // Custom Scrollbar
+      &::-webkit-scrollbar {
+        width: 6px;
+        height: 6px;
+      }
+      &::-webkit-scrollbar-thumb {
+        background: #ccc;
+        border-radius: 3px;
+      }
+      &::-webkit-scrollbar-track {
+        background: transparent;
+      }
     }
-    
-    // Extra actions area
-    .ant-card-extra {
-      padding: 16px 0;
+
+    .ant-tree {
+      .ant-tree-node-content-wrapper {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+    }
+  }
+
+  .dbm-sql-query-main {
+    flex: 1;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+
+    .ant-card {
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      border-radius: 8px;
+      box-shadow: 0 1px 2px -2px rgba(0, 0, 0, 0.16), 0 3px 6px 0 rgba(0, 0, 0, 0.12), 0 5px 12px 4px rgba(0, 0, 0, 0.09);
+      border: none;
+
+      .ant-card-head {
+        flex-shrink: 0;
+        border-bottom: 1px solid #f0f0f0;
+        padding: 0 24px;
+        min-height: 56px;
+      }
+
+      .ant-card-body {
+        flex: 1;
+        overflow-y: auto;
+        padding: 24px;
+        
+        // Custom Scrollbar
+        &::-webkit-scrollbar {
+          width: 8px;
+          height: 8px;
+        }
+        &::-webkit-scrollbar-thumb {
+          background: #ccc;
+          border-radius: 4px;
+        }
+        &::-webkit-scrollbar-track {
+          background: transparent;
+        }
+      }
+
+      // Extra actions area
+      .ant-card-extra {
+        padding: 16px 0;
+      }
     }
   }
 
@@ -34,12 +116,12 @@
     border-radius: 6px;
     padding: 12px;
     box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.2);
-    
+
     &:focus {
       border-color: #1890ff;
       box-shadow: 0 0 0 2px rgba(24, 144, 255, 0.2), inset 0 2px 4px rgba(0, 0, 0, 0.2);
     }
-    
+
     &::placeholder {
       color: #6a737d;
     }
@@ -48,10 +130,10 @@
   // Button toolbar
   .ant-space {
     width: 100%;
-    
+
     .ant-btn {
       border-radius: 4px;
-      
+
       &.ant-btn-primary {
         box-shadow: 0 2px 4px rgba(24, 144, 255, 0.3);
       }
@@ -62,7 +144,7 @@
   .ant-tabs {
     .ant-tabs-nav {
       margin-bottom: 16px;
-      
+
       &::before {
         border-bottom: 1px solid #f0f0f0;
       }
@@ -74,19 +156,19 @@
     .ant-table {
       border: 1px solid #f0f0f0;
       border-radius: 4px;
-      
+
       .ant-table-thead > tr > th {
         background-color: #fafafa;
         font-weight: 600;
         font-size: 13px;
         padding: 12px 16px;
       }
-      
+
       .ant-table-tbody > tr > td {
         font-size: 13px;
         padding: 8px 16px;
       }
-      
+
       .ant-table-tbody > tr:hover > td {
         background-color: #e6f7ff;
       }
@@ -97,12 +179,12 @@
   .ant-alert {
     border-radius: 4px;
     border: none;
-    
+
     &.ant-alert-info {
       background-color: #e6f7ff;
       border: 1px solid #91d5ff;
     }
-    
+
     &.ant-alert-error {
       background-color: #fff2f0;
       border: 1px solid #ffccc7;

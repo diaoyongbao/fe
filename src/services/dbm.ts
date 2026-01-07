@@ -121,6 +121,42 @@ export function getInstanceDatabases(instanceId: number): Promise<{ dat: string[
     });
 }
 
+// 表信息
+export interface TableInfo {
+    name: string;
+    comment: string;
+    engine: string;
+    rows: number;
+    data_length: number;
+    create_time: string;
+}
+
+// 列信息
+export interface ColumnInfo {
+    name: string;
+    type: string;
+    nullable: boolean;
+    key: string;
+    default: string;
+    extra: string;
+    comment: string;
+    ordinal_position: number;
+}
+
+// 获取数据库的表列表
+export function getInstanceTables(instanceId: number, dbName: string): Promise<{ dat: TableInfo[]; err: string }> {
+    return request(`/api/n9e/dbm/instance/${instanceId}/databases/${dbName}/tables`, {
+        method: RequestMethod.Get,
+    });
+}
+
+// 获取表的列信息
+export function getTableColumns(instanceId: number, dbName: string, tableName: string): Promise<{ dat: ColumnInfo[]; err: string }> {
+    return request(`/api/n9e/dbm/instance/${instanceId}/databases/${dbName}/tables/${tableName}/columns`, {
+        method: RequestMethod.Get,
+    });
+}
+
 // 添加实例
 export function addDBInstance(data: {
     instance_name: string;

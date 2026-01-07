@@ -185,6 +185,14 @@ const en_US = {
         check_passed: 'SQL syntax check passed',
         check_warning: 'SQL syntax has warnings',
         workflow_title_required: 'Please enter workflow title',
+        tables: 'Tables',
+        no_tables: 'No Tables',
+        search_tables: 'Search tables...',
+        refresh_tables: 'Refresh tables',
+        loading_columns: 'Loading columns...',
+        columns: 'Columns',
+        rows: 'Rows',
+        engine: 'Engine',
     },
 
     // Uncommitted Transactions
