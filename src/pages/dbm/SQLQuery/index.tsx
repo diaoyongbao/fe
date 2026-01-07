@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { Card, Select, Space, message, Button, Table, Tag, Alert, Tabs, InputNumber, Modal, Input } from 'antd';
+import React, { useState, useEffect } from 'react';
+import { Card, Select, Space, message, Button, Table, Alert, Tabs, InputNumber, Modal, Input } from 'antd';
 import { PlayCircleOutlined, CheckCircleOutlined, DatabaseOutlined, ClearOutlined, FileTextOutlined } from '@ant-design/icons';
 import { useTranslation } from 'react-i18next';
 import { ColumnsType } from 'antd/es/table';
@@ -9,10 +9,10 @@ import {
     executeSQLQuery,
     checkSQL,
     submitSQLWorkflow,
-    ArcheryInstance,
     ArcherySQLQueryResult
 } from '@/services/dbm';
 import PageLayout from '@/components/pageLayout';
+import { useDBMContext } from '../context';
 import './index.less';
 
 const { Option } = Select;
@@ -21,18 +21,20 @@ const { TextArea } = Input;
 
 const SQLQueryWorkbench: React.FC = () => {
     const { t } = useTranslation('dbm');
+    const { state, setSelectedInstanceId, setInstances, setSqlQueryState } = useDBMContext();
+    
     const [loading, setLoading] = useState(false);
-    const [instances, setInstances] = useState<ArcheryInstance[]>([]);
-    const [selectedInstance, setSelectedInstance] = useState<number | null>(null);
     const [databases, setDatabases] = useState<string[]>([]);
-    const [selectedDatabase, setSelectedDatabase] = useState<string>('');
-    const [sqlContent, setSqlContent] = useState<string>('');
     const [queryResult, setQueryResult] = useState<ArcherySQLQueryResult | null>(null);
-    const [limitNum, setLimitNum] = useState<number>(1000);
     const [activeTab, setActiveTab] = useState<string>('result');
     const [workflowVisible, setWorkflowVisible] = useState(false);
     const [workflowTitle, setWorkflowTitle] = useState<string>('');
     const [workflowDesc, setWorkflowDesc] = useState<string>('');
+
+    // 从 Context 读取状态
+    const selectedInstance = state.selectedInstanceId;
+    const instances = state.instances;
+    const { selectedDatabase, sqlContent, limitNum } = state.sqlQuery;
 
     // 获取实例列表
     const fetchInstances = async () => {
@@ -42,9 +44,11 @@ const SQLQueryWorkbench: React.FC = () => {
                 message.error(res.err);
                 return;
             }
-            setInstances(res.dat?.list || []);
-            if (res.dat?.list && res.dat.list.length > 0) {
-                setSelectedInstance(res.dat.list[0].id);
+            const list = res.dat?.list || [];
+            setInstances(list);
+            // 如果没有选中实例且有实例列表，选中第一个
+            if (!selectedInstance && list.length > 0) {
+                setSelectedInstanceId(list[0].id);
             }
         } catch (error) {
             message.error(t('sqlquery.fetch_instances_failed'));
@@ -61,7 +65,6 @@ const SQLQueryWorkbench: React.FC = () => {
                 return;
             }
             setDatabases(res.dat || []);
-            setSelectedDatabase(''); // 重置选择的数据库
         } catch (error) {
             message.error(t('sqlquery.fetch_databases_failed'));
             setDatabases([]);
@@ -69,7 +72,9 @@ const SQLQueryWorkbench: React.FC = () => {
     };
 
     useEffect(() => {
-        fetchInstances();
+        if (instances.length === 0) {
+            fetchInstances();
+        }
     }, []);
 
     // 当选择实例变化时，获取数据库列表
@@ -78,9 +83,29 @@ const SQLQueryWorkbench: React.FC = () => {
             fetchDatabases(selectedInstance);
         } else {
             setDatabases([]);
-            setSelectedDatabase('');
         }
     }, [selectedInstance]);
+
+    // 实例变化处理
+    const handleInstanceChange = (id: number) => {
+        setSelectedInstanceId(id);
+        setSqlQueryState({ selectedDatabase: '' }); // 重置数据库选择
+    };
+
+    // 数据库变化处理
+    const handleDatabaseChange = (db: string) => {
+        setSqlQueryState({ selectedDatabase: db });
+    };
+
+    // SQL 内容变化处理
+    const handleSqlChange = (value: string) => {
+        setSqlQueryState({ sqlContent: value });
+    };
+
+    // Limit 变化处理
+    const handleLimitChange = (value: number | null) => {
+        setSqlQueryState({ limitNum: value || 1000 });
+    };
 
     // 执行SQL查询
     const handleExecuteQuery = async () => {
@@ -103,7 +128,6 @@ const SQLQueryWorkbench: React.FC = () => {
             });
 
             if (res.err) {
-                // 设置错误到 queryResult 以便在界面显示
                 setQueryResult({
                     rows: [],
                     column_list: [],
@@ -207,7 +231,7 @@ const SQLQueryWorkbench: React.FC = () => {
 
     // 清空
     const handleClear = () => {
-        setSqlContent('');
+        setSqlQueryState({ sqlContent: '' });
         setQueryResult(null);
     };
 
@@ -240,7 +264,7 @@ const SQLQueryWorkbench: React.FC = () => {
                             <Select
                                 style={{ width: 250 }}
                                 value={selectedInstance}
-                                onChange={setSelectedInstance}
+                                onChange={handleInstanceChange}
                                 placeholder={t('sqlquery.select_instance')}
                             >
                                 {instances.map((instance) => (
@@ -252,7 +276,7 @@ const SQLQueryWorkbench: React.FC = () => {
                             <Select
                                 style={{ width: 150 }}
                                 value={selectedDatabase}
-                                onChange={setSelectedDatabase}
+                                onChange={handleDatabaseChange}
                                 placeholder={t('sqlquery.select_database')}
                                 allowClear
                             >
@@ -267,7 +291,7 @@ const SQLQueryWorkbench: React.FC = () => {
                                 min={1}
                                 max={10000}
                                 value={limitNum}
-                                onChange={(val) => setLimitNum(val || 1000)}
+                                onChange={handleLimitChange}
                                 style={{ width: 100 }}
                             />
                         </Space>
@@ -278,7 +302,7 @@ const SQLQueryWorkbench: React.FC = () => {
                         <div>
                             <TextArea
                                 value={sqlContent}
-                                onChange={(e) => setSqlContent(e.target.value)}
+                                onChange={(e) => handleSqlChange(e.target.value)}
                                 placeholder={t('sqlquery.sql_placeholder')}
                                 rows={8}
                                 style={{ fontFamily: 'monospace' }}

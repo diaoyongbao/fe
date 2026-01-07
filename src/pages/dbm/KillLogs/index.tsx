@@ -8,10 +8,10 @@ import {
     getArcheryInstances,
     getSentinelRules,
     getSentinelKillLogs,
-    ArcheryInstance,
     SentinelRule,
     SentinelKillLog
 } from '@/services/dbm';
+import { useDBMContext } from '../context';
 import PageLayout from '@/components/pageLayout';
 import './index.less';
 
@@ -20,18 +20,36 @@ const { RangePicker } = DatePicker;
 
 const KillLogs: React.FC = () => {
     const { t } = useTranslation('dbm');
+    const { state, setInstances, setKillLogsState } = useDBMContext();
+    const { instances, killLogs } = state;
+    
     const [loading, setLoading] = useState(false);
     const [logs, setLogs] = useState<SentinelKillLog[]>([]);
     const [total, setTotal] = useState(0);
-    const [instances, setInstances] = useState<ArcheryInstance[]>([]);
     const [rules, setRules] = useState<SentinelRule[]>([]);
-    const [selectedInstance, setSelectedInstance] = useState<number | undefined>();
-    const [selectedRule, setSelectedRule] = useState<number | undefined>();
+    // 使用 Context 中的筛选条件
+    const [selectedInstance, setSelectedInstance] = useState<number | undefined>(
+        killLogs.selectedInstanceId ?? undefined
+    );
+    const [selectedRule, setSelectedRule] = useState<number | undefined>(
+        killLogs.selectedRuleId ?? undefined
+    );
     const [dateRange, setDateRange] = useState<[moment.Moment, moment.Moment] | null>(null);
     const [pagination, setPagination] = useState({ current: 1, pageSize: 20 });
 
-    // 获取实例列表
+    // 同步筛选条件到 Context
+    useEffect(() => {
+        setKillLogsState({
+            selectedInstanceId: selectedInstance ?? null,
+            selectedRuleId: selectedRule ?? null,
+        });
+    }, [selectedInstance, selectedRule]);
+
+    // 获取实例列表（使用共享 Context）
     const fetchInstances = async () => {
+        // 如果 Context 中已有实例列表，不重复请求
+        if (instances.length > 0) return;
+        
         try {
             const res = await getArcheryInstances();
             if (!res.err) {

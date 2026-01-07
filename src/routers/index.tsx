@@ -78,6 +78,7 @@ import UncommittedTrx from '@/pages/dbm/UncommittedTrx';
 import Locks from '@/pages/dbm/Locks';
 import Sentinel from '@/pages/dbm/Sentinel';
 import KillLogs from '@/pages/dbm/KillLogs';
+import { DBMProvider } from '@/pages/dbm/context';
 import MiddlewareManage from '@/pages/middleware';
 import { dynamicPackages, Entry, dynamicPages } from '@/utils';
 // @ts-ignore
@@ -219,15 +220,17 @@ export default function Content() {
 
         <Route exact path='/roles' component={Permissions} />
 
-        {/* 数据库管理路由 */}
-        <Route exact path='/dbm' component={DBMInstanceList} />
-        <Route exact path='/dbm/sessions' component={SessionManagement} />
-        <Route exact path='/dbm/slow-queries' component={SlowQueryAnalysis} />
-        <Route exact path='/dbm/sql-query' component={SQLQueryWorkbench} />
-        <Route exact path='/dbm/uncommitted-trx' component={UncommittedTrx} />
-        <Route exact path='/dbm/locks' component={Locks} />
-        <Route exact path='/dbm/sentinel' component={Sentinel} />
-        <Route exact path='/dbm/kill-logs' component={KillLogs} />
+        {/* 数据库管理路由 - 使用 DBMProvider 保持状态 */}
+        <DBMProvider>
+          <Route exact path='/dbm' component={DBMInstanceList} />
+          <Route exact path='/dbm/sessions' component={SessionManagement} />
+          <Route exact path='/dbm/slow-queries' component={SlowQueryAnalysis} />
+          <Route exact path='/dbm/sql-query' component={SQLQueryWorkbench} />
+          <Route exact path='/dbm/uncommitted-trx' component={UncommittedTrx} />
+          <Route exact path='/dbm/locks' component={Locks} />
+          <Route exact path='/dbm/sentinel' component={Sentinel} />
+          <Route exact path='/dbm/kill-logs' component={KillLogs} />
+        </DBMProvider>
 
         {/* 中间件数据源管理路由 */}
         <Route exact path='/middleware' component={MiddlewareManage} />

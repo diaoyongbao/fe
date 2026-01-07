@@ -1,18 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import { Table, Card, Select, Space, message, Button, Modal, Tag, Tooltip, Tabs } from 'antd';
-import { ReloadOutlined, DeleteOutlined, ExclamationCircleOutlined, LockOutlined } from '@ant-design/icons';
+import { ReloadOutlined, ExclamationCircleOutlined, LockOutlined } from '@ant-design/icons';
 import { useTranslation } from 'react-i18next';
 import { ColumnsType } from 'antd/es/table';
 import {
-    getArcheryInstances,
     getLockWaits,
     getInnoDBLocks,
     killSessions,
-    ArcheryInstance,
     LockWait,
     InnoDBLock
 } from '@/services/dbm';
 import PageLayout from '@/components/pageLayout';
+import { useSharedInstance } from '../useSharedInstance';
 import './index.less';
 
 const { Option } = Select;
@@ -20,30 +19,12 @@ const { TabPane } = Tabs;
 
 const Locks: React.FC = () => {
     const { t } = useTranslation('dbm');
+    const { selectedInstance, instances, handleInstanceChange } = useSharedInstance();
+    
     const [loading, setLoading] = useState(false);
-    const [instances, setInstances] = useState<ArcheryInstance[]>([]);
-    const [selectedInstance, setSelectedInstance] = useState<number | null>(null);
     const [lockWaits, setLockWaits] = useState<LockWait[]>([]);
     const [innoDBLocks, setInnoDBLocks] = useState<InnoDBLock[]>([]);
-    const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
     const [activeTab, setActiveTab] = useState<string>('lock-waits');
-
-    // 获取实例列表
-    const fetchInstances = async () => {
-        try {
-            const res = await getArcheryInstances();
-            if (res.err) {
-                message.error(res.err);
-                return;
-            }
-            setInstances(res.dat?.list || []);
-            if (res.dat?.list && res.dat.list.length > 0) {
-                setSelectedInstance(res.dat.list[0].id);
-            }
-        } catch (error) {
-            message.error(t('locks.fetch_instances_failed'));
-        }
-    };
 
     // 获取锁信息
     const fetchLockData = async () => {
@@ -69,10 +50,6 @@ const Locks: React.FC = () => {
             setLoading(false);
         }
     };
-
-    useEffect(() => {
-        fetchInstances();
-    }, []);
 
     useEffect(() => {
         if (selectedInstance) {
@@ -314,7 +291,7 @@ const Locks: React.FC = () => {
                             <Select
                                 style={{ width: 250 }}
                                 value={selectedInstance}
-                                onChange={setSelectedInstance}
+                                onChange={handleInstanceChange}
                                 placeholder={t('sessions.select_instance')}
                             >
                                 {instances.map((instance) => (

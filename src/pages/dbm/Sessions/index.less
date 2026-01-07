@@ -1,16 +1,67 @@
 .dbm-session-management {
-    padding: 20px;
+  padding: 24px;
+  background-color: #f0f2f5;
+  min-height: 100%;
 
-    .ant-card {
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  .ant-card {
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    border: none;
+    
+    .ant-card-head {
+      border-bottom: 1px solid #f0f0f0;
+      padding: 0 24px;
     }
 
-    .ant-table-thead > tr > th {
+    .ant-card-body {
+      padding: 24px;
+    }
+  }
+
+  // Search and Filter styling
+  .ant-input-search, .ant-select {
+    .ant-input, .ant-select-selector {
+      border-radius: 4px;
+    }
+  }
+
+  // Table styling
+  .ant-table-wrapper {
+    .ant-table {
+      border-radius: 8px 8px 0 0;
+      
+      .ant-table-thead > tr > th {
         background-color: #fafafa;
+        color: #595959;
         font-weight: 600;
-    }
+        border-bottom: 1px solid #f0f0f0;
+        padding: 12px 16px;
+      }
 
-    .ant-tag {
-        font-size: 12px;
+      .ant-table-tbody > tr {
+        transition: background 0.3s;
+        
+        &:hover > td {
+          background-color: #f0f7ff;
+        }
+
+        & > td {
+          padding: 12px 16px;
+          border-bottom: 1px solid #f0f0f0;
+        }
+        
+        // Zebra striping
+        &:nth-child(even) > td {
+          background-color: #fafafa;
+        }
+      }
     }
+  }
+
+  // Tag adjustments
+  .ant-tag {
+    border-radius: 2px;
+    font-weight: 500;
+    margin-right: 4px;
+  }
 }

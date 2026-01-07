@@ -7,10 +7,10 @@ import {
     getArcheryInstances,
     getSessions,
     killSessions,
-    ArcheryInstance,
     ArcherySession
 } from '@/services/dbm';
 import PageLayout from '@/components/pageLayout';
+import { useDBMContext } from '../context';
 import './index.less';
 
 const { Search } = Input;
@@ -18,15 +18,18 @@ const { Option } = Select;
 
 const SessionManagement: React.FC = () => {
     const { t } = useTranslation('dbm');
+    const { state, setSelectedInstanceId, setInstances, setSessionsState } = useDBMContext();
+    
     const [loading, setLoading] = useState(false);
-    const [instances, setInstances] = useState<ArcheryInstance[]>([]);
-    const [selectedInstance, setSelectedInstance] = useState<number | null>(null);
     const [sessions, setSessions] = useState<ArcherySession[]>([]);
     const [filteredSessions, setFilteredSessions] = useState<ArcherySession[]>([]);
     const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
     const [searchText, setSearchText] = useState('');
-    const [commandFilter, setCommandFilter] = useState<string>('all');
-    const [userFilter, setUserFilter] = useState<string>('all');
+
+    // 从 Context 读取状态
+    const selectedInstance = state.selectedInstanceId;
+    const instances = state.instances;
+    const { commandFilter, userFilter } = state.sessions;
 
     // 获取实例列表
     const fetchInstances = async () => {
@@ -36,10 +39,11 @@ const SessionManagement: React.FC = () => {
                 message.error(res.err);
                 return;
             }
-            setInstances(res.dat?.list || []);
-            // 默认选择第一个实例
-            if (res.dat?.list && res.dat.list.length > 0) {
-                setSelectedInstance(res.dat.list[0].id);
+            const list = res.dat?.list || [];
+            setInstances(list);
+            // 如果没有选中实例且有实例列表，选中第一个
+            if (!selectedInstance && list.length > 0) {
+                setSelectedInstanceId(list[0].id);
             }
         } catch (error) {
             message.error(t('sessions.fetch_instances_failed'));
@@ -68,7 +72,9 @@ const SessionManagement: React.FC = () => {
     };
 
     useEffect(() => {
-        fetchInstances();
+        if (instances.length === 0) {
+            fetchInstances();
+        }
     }, []);
 
     useEffect(() => {
@@ -82,12 +88,12 @@ const SessionManagement: React.FC = () => {
         let filtered = sessions;
 
         // 命令类型筛选
-        if (commandFilter !== 'all') {
+        if (commandFilter && commandFilter !== 'all') {
             filtered = filtered.filter((item) => item.command === commandFilter);
         }
 
         // 用户筛选
-        if (userFilter !== 'all') {
+        if (userFilter && userFilter !== 'all') {
             filtered = filtered.filter((item) => item.user === userFilter);
         }
 
@@ -103,6 +109,21 @@ const SessionManagement: React.FC = () => {
 
         setFilteredSessions(filtered);
     }, [sessions, searchText, commandFilter, userFilter]);
+
+    // 实例变化处理
+    const handleInstanceChange = (id: number) => {
+        setSelectedInstanceId(id);
+    };
+
+    // 命令筛选变化处理
+    const handleCommandFilterChange = (value: string) => {
+        setSessionsState({ commandFilter: value });
+    };
+
+    // 用户筛选变化处理
+    const handleUserFilterChange = (value: string) => {
+        setSessionsState({ userFilter: value });
+    };
 
     // 批量Kill会话
     const handleKillSessions = () => {
@@ -256,7 +277,7 @@ const SessionManagement: React.FC = () => {
                             <Select
                                 style={{ width: 250 }}
                                 value={selectedInstance}
-                                onChange={setSelectedInstance}
+                                onChange={handleInstanceChange}
                                 placeholder={t('sessions.select_instance')}
                             >
                                 {instances.map((instance) => (
@@ -294,8 +315,8 @@ const SessionManagement: React.FC = () => {
                             />
                             <Select
                                 style={{ width: 150 }}
-                                value={commandFilter}
-                                onChange={setCommandFilter}
+                                value={commandFilter || 'all'}
+                                onChange={handleCommandFilterChange}
                                 placeholder={t('sessions.filter_by_command')}
                             >
                                 <Option value="all">{t('sessions.all_commands')}</Option>
@@ -307,8 +328,8 @@ const SessionManagement: React.FC = () => {
                             </Select>
                             <Select
                                 style={{ width: 150 }}
-                                value={userFilter}
-                                onChange={setUserFilter}
+                                value={userFilter || 'all'}
+                                onChange={handleUserFilterChange}
                                 placeholder={t('sessions.filter_by_user')}
                             >
                                 <Option value="all">{t('sessions.all_users')}</Option>

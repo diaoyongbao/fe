@@ -17,9 +17,9 @@ import {
     deleteSentinelRules,
     updateSentinelRuleStatus,
     getSentinelStatus,
-    ArcheryInstance,
     SentinelRule
 } from '@/services/dbm';
+import { useDBMContext } from '../context';
 import PageLayout from '@/components/pageLayout';
 import './index.less';
 
@@ -28,10 +28,12 @@ const { TextArea } = Input;
 
 const Sentinel: React.FC = () => {
     const { t } = useTranslation('dbm');
+    const { state, setInstances } = useDBMContext();
+    const { instances } = state;
+    
     const [loading, setLoading] = useState(false);
     const [rules, setRules] = useState<SentinelRule[]>([]);
     const [total, setTotal] = useState(0);
-    const [instances, setInstances] = useState<ArcheryInstance[]>([]);
     const [modalVisible, setModalVisible] = useState(false);
     const [editingRule, setEditingRule] = useState<SentinelRule | null>(null);
     const [form] = Form.useForm();
@@ -41,8 +43,11 @@ const Sentinel: React.FC = () => {
         kills_24h: 0,
     });
 
-    // 获取实例列表
+    // 获取实例列表（使用共享 Context）
     const fetchInstances = async () => {
+        // 如果 Context 中已有实例列表，不重复请求
+        if (instances.length > 0) return;
+        
         try {
             const res = await getArcheryInstances();
             if (!res.err) {

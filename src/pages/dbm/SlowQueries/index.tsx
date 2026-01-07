@@ -1,17 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import { Table, Card, Select, Space, message, Button, Modal, Descriptions, Tag, Tabs, Alert } from 'antd';
-import { ReloadOutlined, DatabaseOutlined, EyeOutlined, LineChartOutlined } from '@ant-design/icons';
+import { ReloadOutlined, EyeOutlined, LineChartOutlined } from '@ant-design/icons';
 import { useTranslation } from 'react-i18next';
 import { ColumnsType } from 'antd/es/table';
 import {
-    getArcheryInstances,
     getSlowQueries,
     getSlowQueryDetail,
-    ArcheryInstance,
     ArcherySlowQuery,
     ArcherySlowQueryDetail
 } from '@/services/dbm';
 import PageLayout from '@/components/pageLayout';
+import { useSharedInstance } from '../useSharedInstance';
 import './index.less';
 
 const { Option } = Select;
@@ -19,30 +18,13 @@ const { TabPane } = Tabs;
 
 const SlowQueryAnalysis: React.FC = () => {
     const { t } = useTranslation('dbm');
+    const { selectedInstance, instances, handleInstanceChange } = useSharedInstance();
+    
     const [loading, setLoading] = useState(false);
-    const [instances, setInstances] = useState<ArcheryInstance[]>([]);
-    const [selectedInstance, setSelectedInstance] = useState<number | null>(null);
     const [slowQueries, setSlowQueries] = useState<ArcherySlowQuery[]>([]);
     const [detailVisible, setDetailVisible] = useState(false);
     const [detailLoading, setDetailLoading] = useState(false);
     const [currentDetail, setCurrentDetail] = useState<ArcherySlowQueryDetail | null>(null);
-
-    // 获取实例列表
-    const fetchInstances = async () => {
-        try {
-            const res = await getArcheryInstances();
-            if (res.err) {
-                message.error(res.err);
-                return;
-            }
-            setInstances(res.dat?.list || []);
-            if (res.dat?.list && res.dat.list.length > 0) {
-                setSelectedInstance(res.dat.list[0].id);
-            }
-        } catch (error) {
-            message.error(t('slowquery.fetch_instances_failed'));
-        }
-    };
 
     // 获取慢查询列表
     const fetchSlowQueries = async () => {
@@ -87,10 +69,6 @@ const SlowQueryAnalysis: React.FC = () => {
             setDetailLoading(false);
         }
     };
-
-    useEffect(() => {
-        fetchInstances();
-    }, []);
 
     useEffect(() => {
         if (selectedInstance) {
@@ -203,7 +181,7 @@ const SlowQueryAnalysis: React.FC = () => {
                             <Select
                                 style={{ width: 250 }}
                                 value={selectedInstance}
-                                onChange={setSelectedInstance}
+                                onChange={handleInstanceChange}
                                 placeholder={t('slowquery.select_instance')}
                             >
                                 {instances.map((instance) => (

@@ -1,44 +1,26 @@
 import React, { useState, useEffect } from 'react';
 import { Table, Card, Select, Space, message, Button, Modal, Tag, Tooltip } from 'antd';
-import { ReloadOutlined, DeleteOutlined, ExclamationCircleOutlined, DatabaseOutlined, WarningOutlined } from '@ant-design/icons';
+import { ReloadOutlined, DeleteOutlined, ExclamationCircleOutlined, WarningOutlined } from '@ant-design/icons';
 import { useTranslation } from 'react-i18next';
 import { ColumnsType } from 'antd/es/table';
 import {
-    getArcheryInstances,
     getUncommittedTransactions,
     killSessions,
-    ArcheryInstance,
     ArcheryUncommittedTrx
 } from '@/services/dbm';
 import PageLayout from '@/components/pageLayout';
+import { useSharedInstance } from '../useSharedInstance';
 import './index.less';
 
 const { Option } = Select;
 
 const UncommittedTrx: React.FC = () => {
     const { t } = useTranslation('dbm');
+    const { selectedInstance, instances, handleInstanceChange } = useSharedInstance();
+    
     const [loading, setLoading] = useState(false);
-    const [instances, setInstances] = useState<ArcheryInstance[]>([]);
-    const [selectedInstance, setSelectedInstance] = useState<number | null>(null);
     const [transactions, setTransactions] = useState<ArcheryUncommittedTrx[]>([]);
     const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
-
-    // 获取实例列表
-    const fetchInstances = async () => {
-        try {
-            const res = await getArcheryInstances();
-            if (res.err) {
-                message.error(res.err);
-                return;
-            }
-            setInstances(res.dat?.list || []);
-            if (res.dat?.list && res.dat.list.length > 0) {
-                setSelectedInstance(res.dat.list[0].id);
-            }
-        } catch (error) {
-            message.error(t('uncommitted.fetch_instances_failed'));
-        }
-    };
 
     // 获取未提交事务列表
     const fetchTransactions = async () => {
@@ -59,10 +41,6 @@ const UncommittedTrx: React.FC = () => {
             setLoading(false);
         }
     };
-
-    useEffect(() => {
-        fetchInstances();
-    }, []);
 
     useEffect(() => {
         if (selectedInstance) {
@@ -224,7 +202,7 @@ const UncommittedTrx: React.FC = () => {
                             <Select
                                 style={{ width: 250 }}
                                 value={selectedInstance}
-                                onChange={setSelectedInstance}
+                                onChange={handleInstanceChange}
                                 placeholder={t('sessions.select_instance')}
                             >
                                 {instances.map((instance) => (
