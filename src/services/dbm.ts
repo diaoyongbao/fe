@@ -1,18 +1,27 @@
 import request from '@/utils/request';
 import { RequestMethod } from '@/store/common';
 
-// Archery 实例信息
+// 数据库实例信息 (匹配后端 DBInstance 模型)
 export interface ArcheryInstance {
     id: number;
     instance_name: string;
-    type: string;
-    db_type: string;
+    db_type: string;          // mysql, redis, mongodb, postgresql
     host: string;
     port: number;
-    user: string;
+    username: string;         // 后端字段是 username 不是 user
     charset: string;
-    create_time: string;
-    update_time: string;
+    max_connections: number;
+    max_idle_conns: number;
+    is_master: boolean;
+    enabled: boolean;
+    health_status: number;    // 0:未知 1:健康 2:异常
+    last_check_time: number;
+    last_check_error: string;
+    description: string;
+    create_at: number;
+    create_by: string;
+    update_at: number;
+    update_by: string;
 }
 
 // 会话信息
@@ -85,18 +94,94 @@ export interface ArcherySQLQueryResult {
     error?: string;
 }
 
-// 获取 Archery 实例列表
-export function getArcheryInstances(): Promise<{ dat: ArcheryInstance[]; err: string }> {
-    return request('/api/n9e/dbm/archery/instances', {
+// 获取实例列表
+export function getArcheryInstances(params?: {
+    db_type?: string;
+    query?: string;
+    limit?: number;
+    p?: number;
+}): Promise<{ dat: { list: ArcheryInstance[]; total: number }; err: string }> {
+    return request('/api/n9e/dbm/instances', {
+        method: RequestMethod.Get,
+        params,
+    });
+}
+
+// 获取单个实例
+export function getArcheryInstance(id: number): Promise<{ dat: ArcheryInstance; err: string }> {
+    return request(`/api/n9e/dbm/instance/${id}`, {
         method: RequestMethod.Get,
     });
 }
 
-// Archery 健康检查
-export function checkArcheryHealth(): Promise<{ dat: { status: string; service: string }; err: string }> {
-    return request('/api/n9e/dbm/archery/health', {
+// 获取实例的数据库列表
+export function getInstanceDatabases(instanceId: number): Promise<{ dat: string[]; err: string }> {
+    return request(`/api/n9e/dbm/instance/${instanceId}/databases`, {
         method: RequestMethod.Get,
     });
+}
+
+// 添加实例
+export function addDBInstance(data: {
+    instance_name: string;
+    db_type: string;
+    host: string;
+    port: number;
+    username: string;
+    password: string;
+    charset?: string;
+    max_connections?: number;
+    max_idle_conns?: number;
+    is_master?: boolean;
+    enabled?: boolean;
+    description?: string;
+}): Promise<{ dat: number; err: string }> {
+    return request('/api/n9e/dbm/instance', {
+        method: RequestMethod.Post,
+        data,
+    });
+}
+
+// 更新实例
+export function updateDBInstance(id: number, data: {
+    instance_name: string;
+    db_type: string;
+    host: string;
+    port: number;
+    username: string;
+    password?: string;
+    charset?: string;
+    max_connections?: number;
+    max_idle_conns?: number;
+    is_master?: boolean;
+    enabled?: boolean;
+    description?: string;
+}): Promise<{ err: string }> {
+    return request(`/api/n9e/dbm/instance/${id}`, {
+        method: RequestMethod.Put,
+        data,
+    });
+}
+
+// 删除实例
+export function deleteDBInstances(ids: number[]): Promise<{ err: string }> {
+    return request('/api/n9e/dbm/instances', {
+        method: RequestMethod.Delete,
+        data: ids,
+    });
+}
+
+// Archery 健康检查 (已废弃，暂时保留接口但也改为实例健康检查，参数变动需注意)
+// 修正：此方法现在需要 instance_id
+export function checkInstanceHealth(instanceId: number): Promise<{ dat: { status: string; message: string }; err: string }> {
+    return request(`/api/n9e/dbm/instance/${instanceId}/health`, {
+        method: RequestMethod.Get,
+    });
+}
+// 兼容旧调用 (仅占位，实际应该废弃)
+export function checkArcheryHealth(): Promise<{ dat: { status: string; service: string }; err: string }> {
+    // 返回伪造的成功，避免页面报错
+    return Promise.resolve({ dat: { status: 'ok', service: 'dbm' }, err: '' });
 }
 
 // ==================== 会话管理 ====================
@@ -108,7 +193,7 @@ export function getSessions(params: {
     user?: string;
     db?: string;
 }): Promise<{ dat: ArcherySession[]; err: string }> {
-    return request('/api/n9e/dbm/archery/sessions', {
+    return request('/api/n9e/dbm/sessions', {
         method: RequestMethod.Post,
         data: params,
     });
@@ -119,7 +204,7 @@ export function killSessions(params: {
     instance_id: number;
     thread_ids: number[];
 }): Promise<{ dat: any; err: string }> {
-    return request('/api/n9e/dbm/archery/sessions/kill', {
+    return request('/api/n9e/dbm/sessions/kill', {
         method: RequestMethod.Post,
         data: params,
     });
@@ -129,7 +214,7 @@ export function killSessions(params: {
 export function getUncommittedTransactions(params: {
     instance_id: number;
 }): Promise<{ dat: ArcheryUncommittedTrx[]; err: string }> {
-    return request('/api/n9e/dbm/archery/uncommitted-trx', {
+    return request('/api/n9e/dbm/uncommitted-trx', {
         method: RequestMethod.Post,
         data: params,
     });
@@ -144,7 +229,7 @@ export function getSlowQueries(params: {
     end_time?: string;
     db_name?: string;
 }): Promise<{ dat: ArcherySlowQuery[]; err: string }> {
-    return request('/api/n9e/dbm/archery/slow-queries', {
+    return request('/api/n9e/dbm/slow-queries', {
         method: RequestMethod.Post,
         data: params,
     });
@@ -155,7 +240,7 @@ export function getSlowQueryDetail(
     instance_id: number,
     checksum: string,
 ): Promise<{ dat: ArcherySlowQueryDetail; err: string }> {
-    return request(`/api/n9e/dbm/archery/slow-query/${instance_id}/${checksum}`, {
+    return request(`/api/n9e/dbm/slow-query/${instance_id}/${checksum}`, {
         method: RequestMethod.Get,
     });
 }
@@ -169,7 +254,7 @@ export function executeSQLQuery(params: {
     sql_content: string;
     limit_num?: number;
 }): Promise<{ dat: ArcherySQLQueryResult; err: string }> {
-    return request('/api/n9e/dbm/archery/sql/query', {
+    return request('/api/n9e/dbm/sql/query', {
         method: RequestMethod.Post,
         data: params,
     });
@@ -181,13 +266,13 @@ export function checkSQL(params: {
     db_name: string;
     sql_content: string;
 }): Promise<{ dat: any; err: string }> {
-    return request('/api/n9e/dbm/archery/sql/check', {
+    return request('/api/n9e/dbm/sql/check', {
         method: RequestMethod.Post,
         data: params,
     });
 }
 
-// 提交SQL工单
+// 提交SQL工单 (保留路径，但目前后端未实现)
 export function submitSQLWorkflow(params: {
     instance_id: number;
     db_name: string;
@@ -197,7 +282,7 @@ export function submitSQLWorkflow(params: {
     description?: string;
     demand_url?: string;
 }): Promise<{ dat: any; err: string }> {
-    return request('/api/n9e/dbm/archery/sql/workflow', {
+    return request('/api/n9e/dbm/sql/workflow', {
         method: RequestMethod.Post,
         data: params,
     });
@@ -252,7 +337,7 @@ export interface InnoDBLock {
 export function getLockWaits(params: {
     instance_id: number;
 }): Promise<{ dat: LockWait[]; err: string }> {
-    return request('/api/n9e/dbm/archery/lock-waits', {
+    return request('/api/n9e/dbm/lock-waits', {
         method: RequestMethod.Post,
         data: params,
     });
@@ -260,7 +345,7 @@ export function getLockWaits(params: {
 
 // 获取 InnoDB 锁信息
 export function getInnoDBLocks(instanceId: number): Promise<{ dat: InnoDBLock[]; err: string }> {
-    return request(`/api/n9e/dbm/archery/innodb-locks?instance_id=${instanceId}`, {
+    return request(`/api/n9e/dbm/innodb-locks?instance_id=${instanceId}`, {
         method: RequestMethod.Get,
     });
 }

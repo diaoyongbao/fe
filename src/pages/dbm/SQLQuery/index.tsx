@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { ColumnsType } from 'antd/es/table';
 import {
     getArcheryInstances,
+    getInstanceDatabases,
     executeSQLQuery,
     checkSQL,
     submitSQLWorkflow,
@@ -41,12 +42,29 @@ const SQLQueryWorkbench: React.FC = () => {
                 message.error(res.err);
                 return;
             }
-            setInstances(res.dat || []);
-            if (res.dat && res.dat.length > 0) {
-                setSelectedInstance(res.dat[0].id);
+            setInstances(res.dat?.list || []);
+            if (res.dat?.list && res.dat.list.length > 0) {
+                setSelectedInstance(res.dat.list[0].id);
             }
         } catch (error) {
             message.error(t('sqlquery.fetch_instances_failed'));
+        }
+    };
+
+    // 获取数据库列表
+    const fetchDatabases = async (instanceId: number) => {
+        try {
+            const res = await getInstanceDatabases(instanceId);
+            if (res.err) {
+                message.error(res.err);
+                setDatabases([]);
+                return;
+            }
+            setDatabases(res.dat || []);
+            setSelectedDatabase(''); // 重置选择的数据库
+        } catch (error) {
+            message.error(t('sqlquery.fetch_databases_failed'));
+            setDatabases([]);
         }
     };
 
@@ -54,10 +72,24 @@ const SQLQueryWorkbench: React.FC = () => {
         fetchInstances();
     }, []);
 
+    // 当选择实例变化时，获取数据库列表
+    useEffect(() => {
+        if (selectedInstance) {
+            fetchDatabases(selectedInstance);
+        } else {
+            setDatabases([]);
+            setSelectedDatabase('');
+        }
+    }, [selectedInstance]);
+
     // 执行SQL查询
     const handleExecuteQuery = async () => {
-        if (!selectedInstance || !sqlContent.trim()) {
-            message.warning(t('sqlquery.please_input_sql'));
+        if (!selectedInstance) {
+            message.warning(t('sqlquery.select_instance_first'));
+            return;
+        }
+        if (!sqlContent.trim()) {
+            message.warning(t('sqlquery.input_sql_first'));
             return;
         }
 
@@ -65,20 +97,46 @@ const SQLQueryWorkbench: React.FC = () => {
         try {
             const res = await executeSQLQuery({
                 instance_id: selectedInstance,
-                db_name: selectedDatabase,
-                sql_content: sqlContent,
+                db_name: selectedDatabase || '',
+                sql_content: sqlContent.trim(),
                 limit_num: limitNum,
             });
 
             if (res.err) {
+                // 设置错误到 queryResult 以便在界面显示
+                setQueryResult({
+                    rows: [],
+                    column_list: [],
+                    affected_rows: 0,
+                    full_sql: sqlContent,
+                    status: 1,
+                    msg: res.err,
+                    error: res.err,
+                });
+                setActiveTab('messages');
                 message.error(res.err);
                 return;
             }
 
             setQueryResult(res.dat);
             setActiveTab('result');
-            message.success(t('sqlquery.execute_success'));
-        } catch (error) {
+            if (res.dat?.status === 0) {
+                message.success(t('sqlquery.execute_success'));
+            } else if (res.dat?.error) {
+                message.error(res.dat.error);
+                setActiveTab('messages');
+            }
+        } catch (error: any) {
+            setQueryResult({
+                rows: [],
+                column_list: [],
+                affected_rows: 0,
+                full_sql: sqlContent,
+                status: 1,
+                msg: error?.message || t('sqlquery.execute_failed'),
+                error: error?.message || t('sqlquery.execute_failed'),
+            });
+            setActiveTab('messages');
             message.error(t('sqlquery.execute_failed'));
         } finally {
             setLoading(false);

@@ -36,10 +36,10 @@ const SessionManagement: React.FC = () => {
                 message.error(res.err);
                 return;
             }
-            setInstances(res.dat || []);
+            setInstances(res.dat?.list || []);
             // 默认选择第一个实例
-            if (res.dat && res.dat.length > 0) {
-                setSelectedInstance(res.dat[0].id);
+            if (res.dat?.list && res.dat.list.length > 0) {
+                setSelectedInstance(res.dat.list[0].id);
             }
         } catch (error) {
             message.error(t('sessions.fetch_instances_failed'));
