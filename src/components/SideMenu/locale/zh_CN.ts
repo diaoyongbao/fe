@@ -51,6 +51,12 @@ const zh_CN = {
     dbm_sentinel: 'DBA哨兵',
     dbm_kill_logs: 'Kill日志',
     middleware: '中间件数据源',
+    // n9e-2kai: AI 助手菜单
+    aiassistant: 'AI 助手',
+    aiassistant_chat: 'AI Chat',
+    aiassistant_settings: '设置',
+    aiassistant_mcp: 'MCP 服务器',
+    aiassistant_templates: '模板中心',
     built_in_components: '模板中心',
     label_mapping: '标签词表',
     embedded_products: '系统集成',

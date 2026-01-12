@@ -1,0 +1,54 @@
+/**
+ * 知识库设置样式
+ * n9e-2kai: AI 助手模块 - 知识库设置
+ */
+
+.knowledge-settings {
+  padding: 16px;
+
+  &.embedded {
+    padding: 0;
+  }
+
+  .ant-tabs-nav {
+    margin-bottom: 16px;
+  }
+
+  .provider-list,
+  .tool-list {
+    &-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+  }
+
+  // 表格样式优化
+  .ant-table {
+    .ant-table-thead>tr>th {
+      background: #fafafa;
+    }
+
+    .ant-tag {
+      margin-right: 4px;
+      margin-bottom: 4px;
+    }
+  }
+
+  // 表单样式
+  .ant-form-item {
+    margin-bottom: 16px;
+  }
+
+  // 关键词标签样式
+  .keyword-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    margin-bottom: 8px;
+
+    .ant-tag {
+      margin: 0;
+    }
+  }
+}

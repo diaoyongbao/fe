@@ -80,6 +80,14 @@ import Sentinel from '@/pages/dbm/Sentinel';
 import KillLogs from '@/pages/dbm/KillLogs';
 import { DBMProvider } from '@/pages/dbm/context';
 import MiddlewareManage from '@/pages/middleware';
+// n9e-2kai: AI 助手模块
+import AIChat from '@/pages/aiassistant/Chat';
+import MCPManagement from '@/pages/aiassistant/MCP';
+import AIConfiguration from '@/pages/aiassistant/Config';
+import TemplateCenter from '@/pages/aiassistant/Templates';
+import AISettings from '@/pages/aiassistant/Settings';
+import AgentManagement from '@/pages/aiassistant/Agent';
+import ToolManagement from '@/pages/aiassistant/Tool';
 import { dynamicPackages, Entry, dynamicPages } from '@/utils';
 // @ts-ignore
 import { Jobs as StrategyBrain } from 'plus:/datasource/anomaly';
@@ -130,7 +138,8 @@ export default function Content() {
       !_.includes(['/', '/account/profile/info', '/account/profile/pwd', '/account/profile/token', '/alert-aggr-events'], location.pathname) &&
       !location.pathname.includes('/settings/datasource/edit/') &&
       !location.pathname.includes('/settings/infrastructure/add') &&
-      !location.pathname.includes('/settings/source/')
+      !location.pathname.includes('/settings/source/') &&
+      !location.pathname.includes('/ai-assistant')  // n9e-2kai: AI 助手路由白名单
     ) {
       if (profile?.roles.indexOf('Admin') === -1) {
         // 如果没有权限则重定向到 403 页面
@@ -148,6 +157,15 @@ export default function Content() {
   return (
     <div className='content'>
       <Switch>
+        {/* n9e-2kai: AI 助手路由 - 放在最前面确保匹配 */}
+        <Route exact path='/ai-assistant' component={AIChat} />
+        <Route exact path='/ai-assistant/settings' component={AISettings} />
+        <Route exact path='/ai-assistant/mcp' component={MCPManagement} />
+        <Route exact path='/ai-assistant/templates' component={TemplateCenter} />
+        <Route exact path='/ai-assistant/config' component={AIConfiguration} />
+        <Route exact path='/ai-assistant/agents' component={AgentManagement} />
+        <Route exact path='/ai-assistant/tools' component={ToolManagement} />
+
         <Route path='/demo' component={Demo} />
         <Route path='/overview' component={Overview} />
         <Route path='/login' component={Login} exact />
@@ -234,6 +252,8 @@ export default function Content() {
 
         {/* 中间件数据源管理路由 */}
         <Route exact path='/middleware' component={MiddlewareManage} />
+
+        {/* n9e-2kai: AI 助手路由已移动到 Switch 开头 */}
 
         {import.meta.env.VITE_IS_ENT !== 'true' && <Route exact path='/system/site-settings' component={SiteSettings} />}
 

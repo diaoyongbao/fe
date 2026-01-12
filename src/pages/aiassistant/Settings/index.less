@@ -1,0 +1,25 @@
+.ai-settings-container {
+  padding: 16px;
+
+  :global {
+    .ant-tabs-card>.ant-tabs-nav .ant-tabs-tab {
+      padding: 8px 16px;
+    }
+
+    .ant-tabs-content {
+      padding: 16px 0;
+    }
+
+    // 嵌入模式下隐藏子页面的 PageLayout
+    .embedded-mode {
+      .ant-page-header {
+        display: none;
+      }
+
+      .ant-card {
+        border: none;
+        box-shadow: none;
+      }
+    }
+  }
+}

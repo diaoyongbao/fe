@@ -1,5 +1,5 @@
 import React from 'react';
-import { NotificationFilled } from '@ant-design/icons';
+import { NotificationFilled, RobotOutlined } from '@ant-design/icons';
 
 import IconFont from '@/components/IconFont';
 
@@ -160,6 +160,25 @@ export const getMenuList = (embeddedProductMenu: MenuItem[] = [], hideDeprecated
           label: 'menu.embedded_products',
         },
         ...embeddedProductMenu,
+      ],
+    },
+    // n9e-2kai: AI 助手模块 - 独立一级菜单
+    // AI Chat 对所有用户可见，AI 设置仅管理员可见
+    {
+      key: 'aiassistant',
+      label: 'menu.aiassistant',
+      icon: <RobotOutlined />,
+      children: [
+        {
+          key: '/ai-assistant',
+          label: 'menu.aiassistant_chat',
+          // 所有用户可见
+        },
+        {
+          key: '/ai-assistant/settings',
+          label: 'menu.aiassistant_settings',
+          role: ['Admin'],  // 仅管理员可见
+        },
       ],
     },
     {

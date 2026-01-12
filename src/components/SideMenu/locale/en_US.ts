@@ -51,6 +51,12 @@ const en_US = {
     dbm_sentinel: 'DBA Sentinel',
     dbm_kill_logs: 'Kill Logs',
     middleware: 'Middleware Datasources',
+    // n9e-2kai: AI Assistant menu
+    aiassistant: 'AI Assistant',
+    aiassistant_chat: 'AI Chat',
+    aiassistant_settings: 'Settings',
+    aiassistant_mcp: 'MCP Servers',
+    aiassistant_templates: 'Templates',
     built_in_components: 'Components',
     label_mapping: 'Label mappings',
     embedded_products: 'Embedded products',
