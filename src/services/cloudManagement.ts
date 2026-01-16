@@ -780,12 +780,9 @@ export function getSlowSQLTracking(sqlHash: string): Promise<{ dat: SlowSQLTrack
 }
 
 // 更新慢SQL跟踪（基于 sql_hash）
+// 注意：owner 相关字段已移至 cloud_rds_owner 表，请使用 assignSlowSQLTracking 接口更新负责人
 export function updateSlowSQLTracking(sqlHash: string, data: {
     priority?: string;
-    owner?: string;
-    owner_email?: string;
-    team?: string;
-    expected_complete_at?: number;
     optimize_note?: string;
     optimize_result?: string;
 }): Promise<{ err: string }> {
@@ -806,15 +803,16 @@ export function updateSlowSQLTrackingStatus(sqlHash: string, data: {
     });
 }
 
-// 指派负责人（基于 sql_hash）
-export function assignSlowSQLTracking(sqlHash: string, data: {
+// 指派负责人（基于 instance_id，影响该实例下所有慢SQL）
+// 注意：现在通过实例ID更新 cloud_rds_owner 表
+export function assignSlowSQLTracking(instanceId: string, data: {
     owner: string;
     owner_email?: string;
     team?: string;
 }): Promise<{ err: string }> {
     return request('/api/n9e/cloud-management/slowsql-tracking/assign', {
         method: RequestMethod.Put,
-        data: { sql_hash: sqlHash, ...data },
+        data: { instance_id: instanceId, ...data },
     });
 }
 

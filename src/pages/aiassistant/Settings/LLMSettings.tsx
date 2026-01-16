@@ -1,111 +1,63 @@
 /**
- * AI 助手 - LLM 设置页面
+ * AI 助手 - LLM 模型管理页面
  * n9e-2kai: AI 助手模块
- * 用于配置 LLM API 调用参数
+ * 用于管理多个自定义 LLM 模型
  */
 import React, { useState, useEffect } from 'react';
-import { Form, Input, Button, Card, Space, message, Alert, Switch, Select, InputNumber, Divider, Typography, Tooltip } from 'antd';
 import {
-    SaveOutlined,
-    ReloadOutlined,
+    Form, Input, Button, Card, Space, message, Alert, Switch, Table, Modal,
+    InputNumber, Divider, Typography, Tooltip, Tag, Popconfirm
+} from 'antd';
+import {
+    PlusOutlined,
+    EditOutlined,
+    DeleteOutlined,
     ApiOutlined,
     EyeInvisibleOutlined,
     EyeTwoTone,
     QuestionCircleOutlined,
     CheckCircleOutlined,
     CloseCircleOutlined,
+    StarOutlined,
+    StarFilled,
     LoadingOutlined,
+    ReloadOutlined,
 } from '@ant-design/icons';
 import { useTranslation } from 'react-i18next';
-import { getAIConfigs, updateAIConfig, reloadAIConfig, testAIConfig, aiAssistantHealth } from '@/services/aiassistant';
+import { ColumnsType } from 'antd/es/table';
+import {
+    getLLMModels, createLLMModel, updateLLMModel, deleteLLMModel,
+    setDefaultLLMModel, testLLMModel, AILLMModel, aiAssistantHealth
+} from '@/services/aiassistant';
 
 const { Text, Title } = Typography;
-const { Option } = Select;
 const { TextArea } = Input;
 
 interface LLMSettingsProps {
     embedded?: boolean;
 }
 
-// LLM 配置结构
-interface LLMConfig {
-    provider: string;
-    model: string;
-    api_key: string;
-    base_url: string;
-    temperature: number;
-    max_tokens: number;
-    timeout: number;
-}
-
-// 预设模型列表
-const PRESET_MODELS = [
-    { label: 'GPT-4o', value: 'gpt-4o', provider: 'openai' },
-    { label: 'GPT-4o-mini', value: 'gpt-4o-mini', provider: 'openai' },
-    { label: 'GPT-4 Turbo', value: 'gpt-4-turbo', provider: 'openai' },
-    { label: 'GPT-3.5 Turbo', value: 'gpt-3.5-turbo', provider: 'openai' },
-    { label: 'Claude 3.5 Sonnet', value: 'claude-3-5-sonnet-20241022', provider: 'anthropic' },
-    { label: 'Claude 3 Opus', value: 'claude-3-opus-20240229', provider: 'anthropic' },
-    { label: 'Gemini 1.5 Pro', value: 'gemini-1.5-pro', provider: 'google' },
-    { label: 'Gemini 1.5 Flash', value: 'gemini-1.5-flash', provider: 'google' },
-    { label: 'DeepSeek Chat', value: 'deepseek-chat', provider: 'deepseek' },
-    { label: 'DeepSeek Coder', value: 'deepseek-coder', provider: 'deepseek' },
-    { label: 'Qwen Max', value: 'qwen-max', provider: 'alibaba' },
-    { label: 'Qwen Plus', value: 'qwen-plus', provider: 'alibaba' },
-    { label: '自定义模型', value: 'custom', provider: 'custom' },
-];
-
-// 预设 API 端点
-const PRESET_ENDPOINTS: Record<string, string> = {
-    openai: 'https://api.openai.com/v1',
-    anthropic: 'https://api.anthropic.com/v1',
-    google: 'https://generativelanguage.googleapis.com/v1beta',
-    deepseek: 'https://api.deepseek.com/v1',
-    alibaba: 'https://dashscope.aliyuncs.com/compatible-mode/v1',
-};
-
 const LLMSettings: React.FC<LLMSettingsProps> = ({ embedded = false }) => {
     const { t } = useTranslation('aiassistant');
     const [form] = Form.useForm();
     const [loading, setLoading] = useState(false);
+    const [models, setModels] = useState<AILLMModel[]>([]);
+    const [modalVisible, setModalVisible] = useState(false);
+    const [editingModel, setEditingModel] = useState<AILLMModel | null>(null);
     const [saving, setSaving] = useState(false);
-    const [testing, setTesting] = useState(false);
+    const [testingId, setTestingId] = useState<number | null>(null);
     const [healthStatus, setHealthStatus] = useState<'unknown' | 'ok' | 'error'>('unknown');
-    const [customModel, setCustomModel] = useState(false);
-    const [originalConfig, setOriginalConfig] = useState<LLMConfig | null>(null);
 
-    // 加载配置
-    const loadConfig = async () => {
+    // 加载模型列表
+    const loadModels = async () => {
         setLoading(true);
         try {
-            const res = await getAIConfigs();
+            const res = await getLLMModels();
             if (res.err) {
                 message.error(res.err);
                 return;
             }
-
-            // 查找默认模型配置
-            const modelConfig = res.dat?.find((c: any) => c.config_key === 'ai.default_model');
-            if (modelConfig && modelConfig.config_value) {
-                try {
-                    const config: LLMConfig = JSON.parse(modelConfig.config_value);
-                    setOriginalConfig(config);
-
-                    // 检查是否是预设模型
-                    const isPreset = PRESET_MODELS.some(m => m.value === config.model && m.value !== 'custom');
-                    setCustomModel(!isPreset);
-
-                    form.setFieldsValue({
-                        ...config,
-                        model_select: isPreset ? config.model : 'custom',
-                        custom_model: !isPreset ? config.model : '',
-                    });
-                } catch (e) {
-                    console.error('解析配置失败:', e);
-                }
-            }
-
-            // 检查健康状态
+            setModels(res.dat || []);
             checkHealth();
         } catch (error) {
             message.error(t('common.operation_failed'));
@@ -122,7 +74,6 @@ const LLMSettings: React.FC<LLMSettingsProps> = ({ embedded = false }) => {
                 setHealthStatus('error');
                 return;
             }
-            // 访问健康状态中的 ai 组件状态
             const healthData = res.dat as any;
             const aiStatus = healthData?.components?.ai;
             if (aiStatus === 'configured' || aiStatus === 'ok') {
@@ -136,105 +87,113 @@ const LLMSettings: React.FC<LLMSettingsProps> = ({ embedded = false }) => {
     };
 
     useEffect(() => {
-        loadConfig();
+        loadModels();
     }, []);
 
-    // 模型选择变化
-    const handleModelChange = (value: string) => {
-        if (value === 'custom') {
-            setCustomModel(true);
-        } else {
-            setCustomModel(false);
-            form.setFieldsValue({ custom_model: '' });
-
-            // 自动填充对应的 Base URL
-            const modelInfo = PRESET_MODELS.find(m => m.value === value);
-            if (modelInfo && PRESET_ENDPOINTS[modelInfo.provider]) {
-                form.setFieldsValue({ base_url: PRESET_ENDPOINTS[modelInfo.provider] });
-            }
-        }
+    // 打开新建模态框
+    const handleAdd = () => {
+        setEditingModel(null);
+        form.resetFields();
+        form.setFieldsValue({
+            temperature: 0.7,
+            max_tokens: 4096,
+            timeout: 60,
+            enabled: true,
+            is_default: false,
+        });
+        setModalVisible(true);
     };
 
-    // 保存配置
+    // 打开编辑模态框
+    const handleEdit = (model: AILLMModel) => {
+        setEditingModel(model);
+        form.setFieldsValue({
+            ...model,
+        });
+        setModalVisible(true);
+    };
+
+    // 保存模型
     const handleSave = async () => {
         try {
             const values = await form.validateFields();
             setSaving(true);
 
-            // 构建配置对象
-            const config: LLMConfig = {
-                provider: values.provider || 'openai',
-                model: values.model_select === 'custom' ? values.custom_model : values.model_select,
-                api_key: values.api_key,
-                base_url: values.base_url,
-                temperature: values.temperature || 0.7,
-                max_tokens: values.max_tokens || 4096,
-                timeout: values.timeout || 60,
-            };
-
-            // 保存到后端
-            const configValue = JSON.stringify(config, null, 2);
-            const res = await updateAIConfig('ai.default_model', configValue);
-
-            if (res.err) {
-                message.error(res.err);
-                return;
+            if (editingModel) {
+                // 更新
+                const res = await updateLLMModel(editingModel.id, values);
+                if (res.err) {
+                    message.error(res.err);
+                    return;
+                }
+                message.success(t('llm_model.update_success'));
+            } else {
+                // 创建
+                const res = await createLLMModel(values);
+                if (res.err) {
+                    message.error(res.err);
+                    return;
+                }
+                message.success(t('llm_model.create_success'));
             }
 
-            // 重载配置
-            await reloadAIConfig();
-
-            message.success(t('llm.save_success'));
-            setOriginalConfig(config);
-
-            // 重新检查健康状态
-            setTimeout(checkHealth, 1000);
+            setModalVisible(false);
+            loadModels();
         } catch (error) {
             console.error('保存失败:', error);
-            message.error(t('common.operation_failed'));
         } finally {
             setSaving(false);
         }
     };
 
-    // 测试连接
-    const handleTestConnection = async () => {
+    // 删除模型
+    const handleDelete = async (id: number) => {
         try {
-            const values = await form.validateFields(['api_key', 'base_url', 'model_select', 'custom_model']);
-            setTesting(true);
-
-            // 构建配置对象
-            const model = values.model_select === 'custom' ? values.custom_model : values.model_select;
-            const config = {
-                provider: 'openai', // 默认使用 OpenAI 兼容协议
-                model: model,
-                api_key: values.api_key,
-                base_url: values.base_url,
-                temperature: values.temperature || 0.7,
-                max_tokens: values.max_tokens || 4096,
-                timeout: values.timeout || 30,
-            };
-
-            // 直接测试配置，不保存
-            const res = await testAIConfig('ai.default_model', JSON.stringify(config));
+            const res = await deleteLLMModel(id);
             if (res.err) {
                 message.error(res.err);
                 return;
             }
+            message.success(t('llm_model.delete_success'));
+            loadModels();
+        } catch (error) {
+            message.error(t('common.operation_failed'));
+        }
+    };
 
+    // 设置默认模型
+    const handleSetDefault = async (id: number) => {
+        try {
+            const res = await setDefaultLLMModel(id);
+            if (res.err) {
+                message.error(res.err);
+                return;
+            }
+            message.success(t('llm_model.set_default_success'));
+            loadModels();
+        } catch (error) {
+            message.error(t('common.operation_failed'));
+        }
+    };
+
+    // 测试连接
+    const handleTest = async (id: number) => {
+        setTestingId(id);
+        try {
+            const res = await testLLMModel(id);
+            if (res.err) {
+                message.error(res.err);
+                return;
+            }
             if (res.dat.status === 'success') {
-                message.success(t('llm.test_success'));
-                setHealthStatus('ok');
+                message.success(t('llm_model.test_success'));
             } else {
                 message.error(res.dat.message);
-                setHealthStatus('error');
             }
         } catch (error) {
-            console.error('Test connection failed:', error);
-            message.error(t('llm.test_failed'));
-            setHealthStatus('error');
+            message.error(t('llm_model.test_failed'));
         } finally {
-            setTesting(false);
+            setTestingId(null);
         }
     };
 
@@ -265,6 +224,112 @@ const LLMSettings: React.FC<LLMSettingsProps> = ({ embedded = false }) => {
         }
     };
 
+    // 表格列定义
+    const columns: ColumnsType<AILLMModel> = [
+        {
+            title: t('llm_model.name'),
+            dataIndex: 'name',
+            key: 'name',
+            render: (text: string, record: AILLMModel) => (
+                <Space>
+                    {record.is_default && (
+                        <Tooltip title={t('llm_model.default_model')}>
+                            <StarFilled style={{ color: '#faad14' }} />
+                        </Tooltip>
+                    )}
+                    <Text strong>{text}</Text>
+                </Space>
+            ),
+        },
+        {
+            title: t('llm_model.model_id'),
+            dataIndex: 'model_id',
+            key: 'model_id',
+            render: (text: string) => <Tag color="blue">{text}</Tag>,
+        },
+        {
+            title: t('llm_model.provider'),
+            dataIndex: 'provider',
+            key: 'provider',
+            render: (text: string) => <Tag>{text || 'openai'}</Tag>,
+        },
+        {
+            title: t('llm_model.base_url'),
+            dataIndex: 'base_url',
+            key: 'base_url',
+            ellipsis: true,
+            width: 200,
+        },
+        {
+            title: t('llm_model.temperature'),
+            dataIndex: 'temperature',
+            key: 'temperature',
+            width: 80,
+        },
+        {
+            title: t('llm.status_connected'),
+            dataIndex: 'enabled',
+            key: 'enabled',
+            width: 80,
+            render: (enabled: boolean) => (
+                enabled ? (
+                    <Tag color="success">{t('llm_model.enabled')}</Tag>
+                ) : (
+                    <Tag color="default">{t('llm_model.disabled')}</Tag>
+                )
+            ),
+        },
+        {
+            title: t('common.actions'),
+            key: 'actions',
+            width: 200,
+            render: (_: any, record: AILLMModel) => (
+                <Space size="small">
+                    <Tooltip title={t('llm_model.test_connection')}>
+                        <Button
+                            type="link"
+                            size="small"
+                            icon={<ApiOutlined />}
+                            loading={testingId === record.id}
+                            onClick={() => handleTest(record.id)}
+                        />
+                    </Tooltip>
+                    {!record.is_default && (
+                        <Tooltip title={t('llm_model.set_as_default')}>
+                            <Button
+                                type="link"
+                                size="small"
+                                icon={<StarOutlined />}
+                                onClick={() => handleSetDefault(record.id)}
+                            />
+                        </Tooltip>
+                    )}
+                    <Tooltip title={t('common.edit')}>
+                        <Button
+                            type="link"
+                            size="small"
+                            icon={<EditOutlined />}
+                            onClick={() => handleEdit(record)}
+                        />
+                    </Tooltip>
+                    <Popconfirm
+                        title={t('llm_model.confirm_delete')}
+                        onConfirm={() => handleDelete(record.id)}
+                    >
+                        <Tooltip title={t('common.delete')}>
+                            <Button
+                                type="link"
+                                size="small"
+                                danger
+                                icon={<DeleteOutlined />}
+                            />
+                        </Tooltip>
+                    </Popconfirm>
+                </Space>
+            ),
+        },
+    ];
+
     return (
         <div className="llm-settings-container">
             <Card
@@ -272,73 +337,89 @@ const LLMSettings: React.FC<LLMSettingsProps> = ({ embedded = false }) => {
                 title={
                     <Space>
                         <ApiOutlined />
-                        <span>{t('llm.title')}</span>
+                        <span>{t('llm_model.title')}</span>
                     </Space>
                 }
-                extra={renderHealthStatus()}
+                extra={
+                    <Space>
+                        {renderHealthStatus()}
+                        <Button
+                            icon={<ReloadOutlined />}
+                            onClick={loadModels}
+                        >
+                            {t('common.refresh')}
+                        </Button>
+                        <Button
+                            type="primary"
+                            icon={<PlusOutlined />}
+                            onClick={handleAdd}
+                        >
+                            {t('llm_model.add')}
+                        </Button>
+                    </Space>
+                }
             >
                 <Alert
-                    message={t('llm.config_tip')}
-                    description={t('llm.config_tip_detail')}
+                    message={t('llm_model.config_tip')}
+                    description={t('llm_model.config_tip_detail')}
                     type="info"
                     showIcon
                     style={{ marginBottom: 24 }}
                 />
 
+                <Table
+                    dataSource={models}
+                    columns={columns}
+                    rowKey="id"
+                    pagination={false}
+                    locale={{ emptyText: t('llm_model.no_models') }}
+                />
+            </Card>
+
+            {/* 新建/编辑模态框 */}
+            <Modal
+                title={editingModel ? t('llm_model.edit') : t('llm_model.add')}
+                visible={modalVisible}
+                onOk={handleSave}
+                onCancel={() => setModalVisible(false)}
+                confirmLoading={saving}
+                width={600}
+                destroyOnClose
+            >
                 <Form
                     form={form}
                     layout="vertical"
-                    initialValues={{
-                        provider: 'openai',
-                        model_select: 'gpt-4o-mini',
-                        base_url: 'https://api.openai.com/v1',
-                        temperature: 0.7,
-                        max_tokens: 4096,
-                        timeout: 60,
-                    }}
+                    preserve={false}
                 >
-                    <Title level={5}>{t('llm.basic_settings')}</Title>
+                    <Form.Item
+                        name="name"
+                        label={t('llm_model.name')}
+                        rules={[{ required: true, message: t('llm_model.name_required') }]}
+                    >
+                        <Input placeholder={t('llm_model.name_placeholder')} />
+                    </Form.Item>
 
                     <Form.Item
-                        name="model_select"
+                        name="model_id"
                         label={
                             <Space>
-                                {t('llm.model')}
-                                <Tooltip title={t('llm.model_tip')}>
+                                {t('llm_model.model_id')}
+                                <Tooltip title={t('llm_model.model_id_tip')}>
                                     <QuestionCircleOutlined />
                                 </Tooltip>
                             </Space>
                         }
-                        rules={[{ required: true, message: t('llm.model_required') }]}
+                        rules={[{ required: true, message: t('llm_model.model_id_required') }]}
                     >
-                        <Select
-                            placeholder={t('llm.model_placeholder')}
-                            onChange={handleModelChange}
-                            showSearch
-                            optionFilterProp="label"
-                        >
-                            {PRESET_MODELS.map(model => (
-                                <Option key={model.value} value={model.value} label={model.label}>
-                                    <Space>
-                                        <span>{model.label}</span>
-                                        <Text type="secondary" style={{ fontSize: 12 }}>
-                                            ({model.provider})
-                                        </Text>
-                                    </Space>
-                                </Option>
-                            ))}
-                        </Select>
+                        <Input placeholder="e.g., gpt-4o-mini, deepseek-chat" />
                     </Form.Item>
 
-                    {customModel && (
-                        <Form.Item
-                            name="custom_model"
-                            label={t('llm.custom_model')}
-                            rules={[{ required: customModel, message: t('llm.custom_model_required') }]}
-                        >
-                            <Input placeholder="e.g., gpt-4-1106-preview" />
-                        </Form.Item>
-                    )}
+                    <Form.Item
+                        name="provider"
+                        label={t('llm_model.provider')}
+                    >
+                        <Input placeholder="e.g., openai, anthropic, deepseek" />
+                    </Form.Item>
 
                     <Form.Item
                         name="api_key"
@@ -373,97 +454,98 @@ const LLMSettings: React.FC<LLMSettingsProps> = ({ embedded = false }) => {
                         <Input placeholder="https://api.openai.com/v1" />
                     </Form.Item>
 
+                    <Form.Item
+                        name="description"
+                        label={t('llm_model.description')}
+                    >
+                        <TextArea rows={2} placeholder={t('llm_model.description_placeholder')} />
+                    </Form.Item>
+
                     <Divider />
                     <Title level={5}>{t('llm.advanced_settings')}</Title>
 
-                    <Form.Item
-                        name="temperature"
-                        label={
-                            <Space>
-                                {t('llm.temperature')}
-                                <Tooltip title={t('llm.temperature_tip')}>
-                                    <QuestionCircleOutlined />
-                                </Tooltip>
-                            </Space>
-                        }
-                    >
-                        <InputNumber
-                            min={0}
-                            max={2}
-                            step={0.1}
-                            precision={1}
-                            style={{ width: 200 }}
-                        />
-                    </Form.Item>
+                    <Space size="large">
+                        <Form.Item
+                            name="temperature"
+                            label={
+                                <Space>
+                                    {t('llm.temperature')}
+                                    <Tooltip title={t('llm.temperature_tip')}>
+                                        <QuestionCircleOutlined />
+                                    </Tooltip>
+                                </Space>
+                            }
+                        >
+                            <InputNumber
+                                min={0}
+                                max={2}
+                                step={0.1}
+                                precision={1}
+                                style={{ width: 120 }}
+                            />
+                        </Form.Item>
 
-                    <Form.Item
-                        name="max_tokens"
-                        label={
-                            <Space>
-                                {t('llm.max_tokens')}
-                                <Tooltip title={t('llm.max_tokens_tip')}>
-                                    <QuestionCircleOutlined />
-                                </Tooltip>
-                            </Space>
-                        }
-                    >
-                        <InputNumber
-                            min={100}
-                            max={128000}
-                            step={1000}
-                            style={{ width: 200 }}
-                        />
-                    </Form.Item>
+                        <Form.Item
+                            name="max_tokens"
+                            label={
+                                <Space>
+                                    {t('llm.max_tokens')}
+                                    <Tooltip title={t('llm.max_tokens_tip')}>
+                                        <QuestionCircleOutlined />
+                                    </Tooltip>
+                                </Space>
+                            }
+                        >
+                            <InputNumber
+                                min={100}
+                                max={128000}
+                                step={1000}
+                                style={{ width: 120 }}
+                            />
+                        </Form.Item>
 
-                    <Form.Item
-                        name="timeout"
-                        label={
-                            <Space>
-                                {t('llm.timeout')}
-                                <Tooltip title={t('llm.timeout_tip')}>
-                                    <QuestionCircleOutlined />
-                                </Tooltip>
-                            </Space>
-                        }
-                    >
-                        <InputNumber
-                            min={10}
-                            max={300}
-                            step={10}
-                            addonAfter={t('llm.seconds')}
-                            style={{ width: 200 }}
-                        />
-                    </Form.Item>
+                        <Form.Item
+                            name="timeout"
+                            label={
+                                <Space>
+                                    {t('llm.timeout')}
+                                    <Tooltip title={t('llm.timeout_tip')}>
+                                        <QuestionCircleOutlined />
+                                    </Tooltip>
+                                </Space>
+                            }
+                        >
+                            <InputNumber
+                                min={10}
+                                max={300}
+                                step={10}
+                                addonAfter={t('llm.seconds')}
+                                style={{ width: 120 }}
+                            />
+                        </Form.Item>
+                    </Space>
 
                     <Divider />
 
-                    <Form.Item>
-                        <Space>
-                            <Button
-                                type="primary"
-                                icon={<SaveOutlined />}
-                                onClick={handleSave}
-                                loading={saving}
-                            >
-                                {t('common.save')}
-                            </Button>
-                            <Button
-                                icon={<ApiOutlined />}
-                                onClick={handleTestConnection}
-                                loading={testing}
-                            >
-                                {t('llm.test_connection')}
-                            </Button>
-                            <Button
-                                icon={<ReloadOutlined />}
-                                onClick={loadConfig}
-                            >
-                                {t('common.refresh')}
-                            </Button>
-                        </Space>
-                    </Form.Item>
+                    <Space size="large">
+                        <Form.Item
+                            name="enabled"
+                            label={t('llm_model.enabled')}
+                            valuePropName="checked"
+                        >
+                            <Switch />
+                        </Form.Item>
+
+                        <Form.Item
+                            name="is_default"
+                            label={t('llm_model.is_default')}
+                            valuePropName="checked"
+                        >
+                            <Switch />
+                        </Form.Item>
+                    </Space>
                 </Form>
-            </Card>
+            </Modal>
         </div>
     );
 };

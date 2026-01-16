@@ -139,6 +139,39 @@ const en_US = {
         status_checking: 'Checking...',
     },
 
+    // LLM Model Management
+    llm_model: {
+        title: 'LLM Model Management',
+        config_tip: 'Manage multiple LLM model configurations',
+        config_tip_detail: 'You can add multiple LLM model configurations supporting OpenAI, Anthropic, DeepSeek, Alibaba Cloud and more. Set one as default and AI Assistant will use it for conversations.',
+        add: 'Add Model',
+        edit: 'Edit Model',
+        name: 'Model Name',
+        name_required: 'Please enter model name',
+        name_placeholder: 'e.g., DeepSeek Chat, GPT-4o',
+        model_id: 'Model ID',
+        model_id_required: 'Please enter model ID',
+        model_id_tip: 'Model identifier used in API calls',
+        provider: 'Provider',
+        description: 'Description',
+        description_placeholder: 'Describe the purpose and features of this model',
+        temperature: 'Temperature',
+        is_default: 'Default Model',
+        default_model: 'Default Model',
+        enabled: 'Enabled',
+        disabled: 'Disabled',
+        test_connection: 'Test Connection',
+        test_success: 'Connection test successful!',
+        test_failed: 'Connection test failed',
+        set_as_default: 'Set as Default',
+        set_default_success: 'Set as default model successfully',
+        confirm_delete: 'Are you sure to delete this model?',
+        create_success: 'Model created successfully',
+        update_success: 'Model updated successfully',
+        delete_success: 'Model deleted successfully',
+        no_models: 'No model configurations. Click "Add Model" to create one.',
+    },
+
     // 对话页面
     chat: {
         placeholder: 'Enter message...',
@@ -305,6 +338,7 @@ const en_US = {
         update_at: 'Updated At',
         create_by: 'Created By',
         update_by: 'Updated By',
+        actions: 'Actions',
     },
 
     // n9e-2kai: Agent Management

@@ -603,3 +603,76 @@ export function deleteAITool(id: number): Promise<{ dat: string; err: string }> 
         method: RequestMethod.Delete,
     });
 }
+
+// ===== LLM 模型管理 =====
+
+// LLM 模型定义
+export interface AILLMModel {
+    id: number;
+    name: string;
+    model_id: string;
+    provider: string;
+    api_key: string;
+    base_url: string;
+    temperature: number;
+    max_tokens: number;
+    timeout: number;
+    description: string;
+    is_default: boolean;
+    enabled: boolean;
+    create_at: number;
+    create_by: string;
+    update_at: number;
+    update_by: string;
+}
+
+// 获取 LLM 模型列表
+export function getLLMModels(): Promise<{ dat: AILLMModel[]; err: string }> {
+    return request('/api/n9e/ai-assistant/llm-models', {
+        method: RequestMethod.Get,
+    });
+}
+
+// 获取单个 LLM 模型
+export function getLLMModel(id: number): Promise<{ dat: AILLMModel; err: string }> {
+    return request(`/api/n9e/ai-assistant/llm-models/${id}`, {
+        method: RequestMethod.Get,
+    });
+}
+
+// 创建 LLM 模型
+export function createLLMModel(model: Partial<AILLMModel>): Promise<{ dat: number; err: string }> {
+    return request('/api/n9e/ai-assistant/llm-models', {
+        method: RequestMethod.Post,
+        data: model,
+    });
+}
+
+// 更新 LLM 模型
+export function updateLLMModel(id: number, updates: Partial<AILLMModel>): Promise<{ dat: string; err: string }> {
+    return request(`/api/n9e/ai-assistant/llm-models/${id}`, {
+        method: RequestMethod.Put,
+        data: updates,
+    });
+}
+
+// 删除 LLM 模型
+export function deleteLLMModel(id: number): Promise<{ dat: string; err: string }> {
+    return request(`/api/n9e/ai-assistant/llm-models/${id}`, {
+        method: RequestMethod.Delete,
+    });
+}
+
+// 设置默认 LLM 模型
+export function setDefaultLLMModel(id: number): Promise<{ dat: string; err: string }> {
+    return request(`/api/n9e/ai-assistant/llm-models/${id}/default`, {
+        method: RequestMethod.Post,
+    });
+}
+
+// 测试 LLM 模型连接
+export function testLLMModel(id: number): Promise<{ dat: { status: string; message: string; response?: string; model?: string }; err: string }> {
+    return request(`/api/n9e/ai-assistant/llm-models/${id}/test`, {
+        method: RequestMethod.Post,
+    });
+}

@@ -139,6 +139,39 @@ const zh_CN = {
         status_checking: '检查中...',
     },
 
+    // LLM 模型管理
+    llm_model: {
+        title: 'LLM 模型管理',
+        config_tip: '管理多个 LLM 模型配置',
+        config_tip_detail: '您可以添加多个 LLM 模型配置，支持 OpenAI、Anthropic、DeepSeek、阿里云等主流模型。设置其中一个为默认模型，AI 助手将使用该模型进行对话。',
+        add: '添加模型',
+        edit: '编辑模型',
+        name: '模型名称',
+        name_required: '请输入模型名称',
+        name_placeholder: '如：DeepSeek Chat、GPT-4o 等',
+        model_id: '模型 ID',
+        model_id_required: '请输入模型 ID',
+        model_id_tip: 'API 调用时使用的模型标识符',
+        provider: '提供商',
+        description: '模型描述',
+        description_placeholder: '描述此模型的用途和特点',
+        temperature: '温度',
+        is_default: '默认模型',
+        default_model: '默认模型',
+        enabled: '已启用',
+        disabled: '已禁用',
+        test_connection: '测试连接',
+        test_success: '连接测试成功！',
+        test_failed: '连接测试失败',
+        set_as_default: '设为默认',
+        set_default_success: '已设置为默认模型',
+        confirm_delete: '确定要删除此模型吗？',
+        create_success: '模型创建成功',
+        update_success: '模型更新成功',
+        delete_success: '模型删除成功',
+        no_models: '暂无模型配置，请点击"添加模型"创建',
+    },
+
     // 对话页面
     chat: {
         placeholder: '输入消息...',
@@ -308,6 +341,7 @@ const zh_CN = {
         update_at: '更新时间',
         create_by: '创建人',
         update_by: '更新人',
+        actions: '操作',
     },
 
     // n9e-2kai: Agent 管理

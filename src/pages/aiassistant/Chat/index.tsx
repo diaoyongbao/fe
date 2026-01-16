@@ -58,7 +58,7 @@ const AIChat: React.FC = () => {
     const [aiConfigured, setAiConfigured] = useState<boolean | null>(null);
     const [checkingHealth, setCheckingHealth] = useState(true);
     const messagesEndRef = useRef<HTMLDivElement>(null);
-    
+
     // n9e-2kai: @Mention 相关状态
     const [agents, setAgents] = useState<AIAgent[]>([]);
     const [mentionVisible, setMentionVisible] = useState(false);
@@ -425,6 +425,11 @@ const AIChat: React.FC = () => {
                     <span>{t('chat.thinking')}</span>
                 </div>
             );
+        }
+
+        // Debug: Log info about message content to trace image issues
+        if (msg.role === 'assistant') {
+            console.log('Rendering assistant message:', msg.id, msg.content);
         }
 
         return (
