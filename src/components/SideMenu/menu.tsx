@@ -1,5 +1,5 @@
 import React from 'react';
-import { NotificationFilled, RobotOutlined } from '@ant-design/icons';
+import { NotificationFilled, RobotOutlined, CloudOutlined } from '@ant-design/icons';
 
 import IconFont from '@/components/IconFont';
 
@@ -160,6 +160,45 @@ export const getMenuList = (embeddedProductMenu: MenuItem[] = [], hideDeprecated
           label: 'menu.embedded_products',
         },
         ...embeddedProductMenu,
+      ],
+    },
+    // n9e-2kai: 云服务管理模块 - 独立一级菜单
+    // 仅管理员可见
+    {
+      key: 'cloudManagement',
+      label: 'menu.cloud_management',
+      icon: <CloudOutlined />,
+      role: ['Admin'],
+      children: [
+        {
+          key: 'cloud-resources',
+          label: 'menu.cloud_resources',
+          type: 'tabs',
+          children: [
+            { key: '/cloud-management/ecs', label: 'menu.cloud_ecs' },
+            { key: '/cloud-management/rds', label: 'menu.cloud_rds' },
+          ],
+        },
+        {
+          key: 'cloud-reports',
+          label: 'menu.cloud_reports',
+          type: 'tabs',
+          children: [
+            { key: '/cloud-management/slowlog-report', label: 'menu.slowlog_report' },
+            { key: '/cloud-management/slowsql-tracking', label: 'menu.slowsql_tracking' },
+          ],
+        },
+        {
+          key: 'cloud-settings',
+          label: 'menu.cloud_settings',
+          type: 'tabs',
+          children: [
+            { key: '/cloud-management/accounts', label: 'menu.cloud_accounts' },
+            { key: '/cloud-management/sync-config', label: 'menu.cloud_sync_config' },
+            { key: '/cloud-management/sync-logs', label: 'menu.cloud_sync_logs' },
+            { key: '/cloud-management/staff', label: 'menu.cloud_staff' },
+          ],
+        },
       ],
     },
     // n9e-2kai: AI 助手模块 - 独立一级菜单

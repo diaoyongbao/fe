@@ -1,0 +1,46 @@
+// n9e-2kai: 慢日志统计报告样式
+
+.slowlog-report-page {
+    padding: 0;
+
+    .ant-card {
+        border-radius: 8px;
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
+    }
+
+    .ant-statistic-title {
+        font-size: 12px;
+        color: #8c8c8c;
+    }
+
+    .ant-statistic-content-value {
+        font-size: 24px;
+        font-weight: 600;
+    }
+
+    .ant-table {
+        .ant-table-thead>tr>th {
+            background: #fafafa;
+            font-weight: 500;
+        }
+    }
+
+    pre {
+        margin: 8px 0 0 0;
+    }
+}
+
+[data-theme='dark'] .slowlog-report-page {
+    .ant-card {
+        background: #1f1f1f;
+        border-color: #303030;
+    }
+
+    .ant-statistic-title {
+        color: #8c8c8c;
+    }
+
+    .ant-table-thead>tr>th {
+        background: #262626;
+    }
+}

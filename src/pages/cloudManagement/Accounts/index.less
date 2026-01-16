@@ -1,0 +1,110 @@
+.cloud-management-page {
+    padding: 16px;
+
+    .stats-card-container {
+        margin-bottom: 24px;
+        .ant-col {
+            margin-bottom: 16px;
+        }
+    }
+
+    .stats-card {
+        background: #fff;
+        border-radius: 8px;
+        padding: 20px;
+        display: flex;
+        align-items: center;
+        box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.03);
+        transition: all 0.3s;
+        border: 1px solid #f0f0f0;
+
+        &:hover {
+            box-shadow: 0 4px 12px 0 rgba(0, 0, 0, 0.08);
+            transform: translateY(-2px);
+        }
+
+        .stats-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            margin-right: 16px;
+            
+            &.blue { background: #e6f7ff; color: #1890ff; }
+            &.green { background: #f6ffed; color: #52c41a; }
+            &.red { background: #fff1f0; color: #ff4d4f; }
+            &.orange { background: #fff7e6; color: #fa8c16; }
+        }
+
+        .stats-content {
+            flex: 1;
+            .stats-title {
+                color: #8c8c8c;
+                font-size: 14px;
+                margin-bottom: 4px;
+            }
+            .stats-value {
+                color: #262626;
+                font-size: 24px;
+                font-weight: 600;
+                line-height: 1.2;
+            }
+        }
+    }
+
+    .search-filter-card {
+        margin-bottom: 24px;
+        border-radius: 8px;
+        
+        .ant-card-body {
+            padding: 24px;
+        }
+
+        .filter-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 16px;
+            align-items: center;
+            
+            .filter-item {
+                display: flex;
+                align-items: center;
+                .label {
+                    margin-right: 8px;
+                    color: #595959;
+                }
+            }
+            
+            .filter-actions {
+                margin-left: auto;
+            }
+        }
+    }
+
+    .data-table-card {
+        border-radius: 8px;
+        overflow: hidden;
+
+        .ant-table-thead > tr > th {
+            background: #fafafa;
+            font-weight: 600;
+        }
+    }
+
+    .provider-tag {
+        display: inline-flex;
+        align-items: center;
+        padding: 4px 8px;
+        border-radius: 4px;
+        font-size: 12px;
+        
+        &.huawei { color: #d93026; background: #ffeceb; border: 1px solid #ffccc7; }
+        &.aliyun { color: #ff6a00; background: #fff2e8; border: 1px solid #ffbb96; }
+        &.tencent { color: #0052d9; background: #e6f7ff; border: 1px solid #91caff; }
+        &.volcengine { color: #1f2329; background: #f5f5f5; border: 1px solid #d9d9d9; }
+        &.aws { color: #ff9900; background: #fffbe6; border: 1px solid #ffe58f; }
+    }
+}

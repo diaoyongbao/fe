@@ -88,6 +88,15 @@ import TemplateCenter from '@/pages/aiassistant/Templates';
 import AISettings from '@/pages/aiassistant/Settings';
 import AgentManagement from '@/pages/aiassistant/Agent';
 import ToolManagement from '@/pages/aiassistant/Tool';
+// n9e-2kai: 云服务管理模块
+import CloudAccountList from '@/pages/cloudManagement/Accounts';
+import CloudECSList from '@/pages/cloudManagement/ECS';
+import CloudRDSList from '@/pages/cloudManagement/RDS';
+import CloudSyncLogList from '@/pages/cloudManagement/SyncLogs';
+import CloudSyncConfigList from '@/pages/cloudManagement/SyncConfig';
+import SlowLogReport from '@/pages/cloudManagement/SlowLogReport';
+import SlowSQLTracking from '@/pages/cloudManagement/SlowSQLTracking';
+import StaffManagement from '@/pages/cloudManagement/StaffManagement';
 import { dynamicPackages, Entry, dynamicPages } from '@/utils';
 // @ts-ignore
 import { Jobs as StrategyBrain } from 'plus:/datasource/anomaly';
@@ -139,7 +148,8 @@ export default function Content() {
       !location.pathname.includes('/settings/datasource/edit/') &&
       !location.pathname.includes('/settings/infrastructure/add') &&
       !location.pathname.includes('/settings/source/') &&
-      !location.pathname.includes('/ai-assistant')  // n9e-2kai: AI 助手路由白名单
+      !location.pathname.includes('/ai-assistant') &&  // n9e-2kai: AI 助手路由白名单
+      !location.pathname.includes('/cloud-management')  // n9e-2kai: 云服务管理路由白名单
     ) {
       if (profile?.roles.indexOf('Admin') === -1) {
         // 如果没有权限则重定向到 403 页面
@@ -165,6 +175,16 @@ export default function Content() {
         <Route exact path='/ai-assistant/config' component={AIConfiguration} />
         <Route exact path='/ai-assistant/agents' component={AgentManagement} />
         <Route exact path='/ai-assistant/tools' component={ToolManagement} />
+
+        {/* n9e-2kai: 云服务管理路由 */}
+        <Route exact path='/cloud-management/accounts' component={CloudAccountList} />
+        <Route exact path='/cloud-management/ecs' component={CloudECSList} />
+        <Route exact path='/cloud-management/rds' component={CloudRDSList} />
+        <Route exact path='/cloud-management/sync-config' component={CloudSyncConfigList} />
+        <Route exact path='/cloud-management/sync-logs' component={CloudSyncLogList} />
+        <Route exact path='/cloud-management/slowlog-report' component={SlowLogReport} />
+        <Route exact path='/cloud-management/slowsql-tracking' component={SlowSQLTracking} />
+        <Route exact path='/cloud-management/staff' component={StaffManagement} />
 
         <Route path='/demo' component={Demo} />
         <Route path='/overview' component={Overview} />
