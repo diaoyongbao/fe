@@ -21,6 +21,7 @@ import MenuList from './MenuList';
 import QuickStart from 'plus:/components/quickStart';
 import QuickMenu from './QuickMenu';
 import { MenuItem, DefaultLogos } from './types';
+import { getFilteredExtensionMenuItems, extensionRegistry } from '@/extensions';
 import './menu.less';
 import './locale';
 
@@ -152,8 +153,14 @@ const SideMenu = (props: SideMenuProps) => {
       })
       .filter(Boolean) as MenuItem[];
 
+    // 添加扩展菜单（根据用户权限过滤）
+    const extensionMenus = getFilteredExtensionMenuItems(perms || []);
+    if (extensionMenus && extensionMenus.length > 0) {
+      filteredMenus.push(...(extensionMenus as MenuItem[]));
+    }
+
     setMenus(filteredMenus);
-  }, [i18n.language, embeddedProductMenu]);
+  }, [i18n.language, embeddedProductMenu, perms]);
 
   const menuPaths = useMemo(
     () =>

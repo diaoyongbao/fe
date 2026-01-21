@@ -66,6 +66,7 @@ import RecordingRule, { Add as RecordingRuleAdd, Edit as RecordingRuleEdit } fro
 import TraceExplorer, { Dependencies as TraceDependencies } from '@/pages/traceCpt/Explorer';
 import Permissions from '@/pages/permissions';
 import SSOConfigs from '@/pages/help/SSOConfigs';
+import { ExtensionRoutes } from '@/extensions';
 import NotificationTpls from '@/pages/help/NotificationTpls';
 import NotificationSettings from '@/pages/help/NotificationSettings';
 import MigrateDashboards from '@/pages/help/migrate';
@@ -223,6 +224,8 @@ export default function Content() {
         {_.map(plusLoader.routes, (route, i) => (
           <RouteWithSubRoutes key={i} {...route} />
         ))}
+        {/* 扩展模块路由 */}
+        <ExtensionRoutes />
         <Route path='/' exact>
           <Redirect to={siteInfo?.home_page_url || '/metric/explorer'} />
         </Route>

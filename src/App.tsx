@@ -41,6 +41,7 @@ import SharedDetail from '@/pages/event/DetailNG/SharedDetail';
 import HocRenderer from './components/HocRenderer';
 import HeaderMenu from './components/SideMenu';
 import Content from './routers';
+import { loadExtensions } from './extensions';
 
 // @ts-ignore
 import useIsPlus from 'plus:/components/useIsPlus';
@@ -252,6 +253,8 @@ function App() {
         }
         // 非匿名访问，需要初始化一些公共数据
         if (!anonymous) {
+          // 加载扩展模块
+          await loadExtensions();
           const installTs = await getInstallDate();
           const { dat: profile } = await GetProfile();
           const { dat: busiGroups } = await getBusiGroups();
