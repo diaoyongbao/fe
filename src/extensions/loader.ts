@@ -320,6 +320,14 @@ async function doLoadExtensions(): Promise<void> {
       console.warn('[ExtensionLoader] ext-ai-assistant.js not found, skipping');
     }
 
+    // 尝试加载 Cloud Manager 扩展
+    try {
+      await loadScript(`${basePath}/ext-cloud-manager.js`);
+      console.log('[ExtensionLoader] Loaded ext-cloud-manager.js');
+    } catch (e) {
+      console.warn('[ExtensionLoader] ext-cloud-manager.js not found, skipping');
+    }
+
     // 等待一小段时间，确保 ES 模块内的代码执行完成
     await new Promise(resolve => setTimeout(resolve, 200));
 
